@@ -1,3 +1,13 @@
+# Mono Repo
+
+## Packages: UI
+
+React-based UI Library with Storybook to document, test and develop.
+
+### Development
+
+to run development server run `yarn workspace @bigandy/ui dev` from the root of the project or `yarn dev` if you are in the packages/ui folder.
+
 # Turborepo starter
 
 This is an official Yarn v1 starter turborepo.
