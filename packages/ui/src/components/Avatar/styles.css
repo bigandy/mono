@@ -1,0 +1,12 @@
+.avatar {
+    background: var(--avatar-background-color);
+    padding: 3rem;
+    display: block;
+    display: flex;
+    justify-content: center;
+}
+
+.avatar img {
+    aspect-ratio: 1;
+    border-radius: 50%;
+}

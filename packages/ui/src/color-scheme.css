@@ -1,0 +1,7 @@
+.color-scheme--light {
+    --avatar-background-color: rgba(129, 131, 131, 0.643);
+}
+
+.color-scheme--dark {
+    --avatar-background-color: black;
+}
