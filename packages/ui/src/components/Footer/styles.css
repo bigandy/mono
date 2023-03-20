@@ -1,0 +1,42 @@
+footer {
+	writing-mode: vertical-rl;
+}
+
+footer:has(details[open]) {
+	position: relative;
+}
+
+footer {
+	p,
+	details {
+		display: inline-block;
+	}
+}
+
+summary {
+	background: unset;
+	padding: unset;
+	margin: unset;
+	border-radius: 0;
+}
+
+details ul {
+	position: absolute;
+	top: 0;
+	right: 0;
+	rotate: -90deg;
+	list-style: none;
+	background: white;
+	padding: 1rem 0.5em;
+	transition: all 3000ms ease;
+	transform: translateX(0em) translateY(0em);
+}
+
+details[open] ul {
+	transform: translateX(-1em) translateY(-1em);
+}
+
+/*  Storybook Specific  */
+:is(#storybook-root, .sbdocs) footer {
+	margin-left: auto;
+}

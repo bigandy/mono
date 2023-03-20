@@ -1,0 +1,34 @@
+header {
+	background-color: black;
+	background-image: linear-gradient(to top, white, #fff0), var(--noise-5);
+	background-size: cover, cover;
+	background-repeat: repeat, repeat;
+
+	filter: contrast(600%) brightness(1050%);
+
+	padding: 2em;
+	--switch: var(--ON);
+
+	border-radius: calc(var(--switch, 40) * 1px);
+
+	transition: all 300ms ease, border-radius 300ms ease;
+}
+
+header:hover {
+    filter: contrast(300%) brightness(150%) grayscale(0.5);
+    --switch: var(--OFF);
+}
+
+article {
+	margin-block: 1.5rem;
+}
+
+article:hover h2 {
+    color: inherit;
+}
+
+header:hover {
+    background-color: var(--blue-9);
+    color: var(--blue-9);
+    --switch: var(--ON);
+}
