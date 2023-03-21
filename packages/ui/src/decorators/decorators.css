@@ -1,3 +1,41 @@
 .storybook__paddedComponent {
     padding: 3rem;
 }
+
+.storybook__box-wrapper {
+    min-height: 100px;
+}
+
+.storybook__resizer {
+    display: block;
+    padding-bottom: 3rem;
+}
+
+.storybook__resizer__parent {
+    border: 1px dotted;
+	padding: 1em;
+	overflow: hidden;
+  	
+	position: relative;
+}
+
+.storybook__resizer__horizontal {
+    resize: horizontal;
+}
+
+.storybook__resizer__vertical {
+    resize: vertical;
+}
+
+.storybook__resizer__both {
+    resize: both;
+}
+
+.storybook__resizer__size-val {
+    position: absolute; 
+    bottom: 0;
+    left: 0;
+    background: white;
+    width: 100%;
+    padding: 1em;
+}

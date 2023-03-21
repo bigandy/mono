@@ -1080,11 +1080,6 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bigandy/re-sizer@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@bigandy/re-sizer/-/re-sizer-0.0.4.tgz#8fab8399bda8eae7fb0e7ff356538d1fa4aceec7"
-  integrity sha512-I+DquYvpilQab3mcziMcjOXtTBEruqOY4Waaxs3v52W2rYJfMaL2JJH7Oq49hK+T94bo2ya7U2polNeiOL+fwQ==
-
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
