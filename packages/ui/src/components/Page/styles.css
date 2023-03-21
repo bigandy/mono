@@ -8,6 +8,11 @@ section {
   color: #333;
 }
 
+section button {
+  display: block;
+  margin-bottom: 3rem;
+}
+
 section h2 {
   font-weight: 700;
   font-size: 32px;

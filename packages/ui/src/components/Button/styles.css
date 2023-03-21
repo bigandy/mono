@@ -1,3 +1,10 @@
-button {
+.btn {
     color: black;
+    border: none;
+}
+
+.btn--primary {
+    background: var(--btn--primary-background, grey);
+    color: var(--btn--primary-text, white);
+    padding: var(--btn--primary-padding-block, 1rem) var(--btn--primary-padding-inline, 1.5rem);
 }

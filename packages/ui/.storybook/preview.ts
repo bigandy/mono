@@ -1,6 +1,7 @@
 import type { Preview } from "@storybook/react";
 
-import "../src/color-scheme.css";
+import "@/color-scheme.css";
+import "@/decorators/decorators.css";
 
 const preview: Preview = {
   parameters: {

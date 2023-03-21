@@ -1,7 +1,9 @@
 import "./styles.css";
+import clsx from "clsx";
 
 interface Props extends React.PropsWithChildren {
-  handleClick?: () => void;
+  onClick?: () => void;
+  primary?: boolean;
 }
 
 /**
@@ -9,6 +11,15 @@ interface Props extends React.PropsWithChildren {
  *
  * @returns JSX.Element
  */
-export const Button = ({ handleClick, children }: Props) => {
-  return <button onClick={handleClick}>{children}</button>;
+export const Button = ({ onClick, children, primary }: Props) => {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx("btn", {
+        "btn--primary": primary,
+      })}
+    >
+      {children}
+    </button>
+  );
 };

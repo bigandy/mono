@@ -1,23 +1,29 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Avatar } from ".";
-
-import { WithTheme } from "@/decorators/WithTheme";
+import { Button } from ".";
 
 const meta = {
-  title: "Examples/Avatar",
-  component: Avatar,
+  title: "Examples/Button",
+  component: Button,
   // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/7.0/react/writing-docs/docs-page
   tags: ["autodocs"],
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/7.0/react/configure/story-layout
     layout: "fullscreen",
   },
-  decorators: [WithTheme],
-} satisfies Meta<typeof Avatar>;
+} satisfies Meta<typeof Button>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  args: {},
+  args: {
+    primary: true,
+    children: "A primary Button",
+  },
+};
+
+export const DefaultButton: Story = {
+  args: {
+    children: "A normal Button",
+  },
 };
