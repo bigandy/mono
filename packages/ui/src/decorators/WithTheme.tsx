@@ -1,4 +1,4 @@
-export const WithTheme = (Story: any, context: any) => {
+export const WithTheme = (Story: React.FC, context: any) => {
   const { scheme } = context.globals;
 
   const LightTheme = () => (
