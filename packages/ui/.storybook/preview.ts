@@ -18,15 +18,15 @@ const preview: Preview = {
 
 export default preview;
 
-// export const globalTypes = {
-//   scheme: {
-//     name: "Scheme",
-//     description: "Select light or dark theme",
-//     defaltValue: "both",
-//     toolbar: {
-//       icon: "mirror",
-//       items: ["light", "dark", "both"],
-//       dynamicTitle: true,
-//     },
-//   },
-// };
+export const globalTypes = {
+  scheme: {
+    name: "Scheme",
+    description: "Select light or dark theme",
+    defaltValue: "both",
+    toolbar: {
+      icon: "mirror",
+      items: ["light", "dark", "both"],
+      dynamicTitle: true,
+    },
+  },
+};

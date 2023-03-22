@@ -27,23 +27,30 @@ export const LoggedOut: Story = {
 
 // More on interaction testing: https://storybook.js.org/docs/7.0/react/writing-tests/interaction-testing
 export const LoggedIn: Story = {
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
-    const loginButton = await canvas.getByRole("button", {
-      name: /Log in/i,
+
+    await step("logged in test", async () => {
+      const loginButton = await canvas.getByRole("button", {
+        name: /Log in/i,
+      });
+      await userEvent.click(loginButton);
+
+      const titleText = await canvasElement.querySelector("#title")
+        ?.textContent;
+      expect(titleText).toEqual("You are now logged in!");
     });
-    await userEvent.click(loginButton);
 
-    let titleText = await canvasElement.querySelector("#title")?.textContent;
-    expect(titleText).toEqual("You are now logged in!");
+    await step("Logout Test", async () => {
+      // Log out again
+      const logoutButton = await canvas.getByRole("button", {
+        name: /Log out/i,
+      });
+      await userEvent.click(logoutButton);
+      const titleText = await canvasElement.querySelector("#title")
+        ?.textContent;
 
-    // Log out again
-    const logoutButton = await canvas.getByRole("button", {
-      name: /Log out/i,
+      expect(titleText).toEqual("You are now logged out");
     });
-    await userEvent.click(logoutButton);
-    titleText = await canvasElement.querySelector("#title")?.textContent;
-
-    expect(titleText).toEqual("You are now logged out");
   },
 };
