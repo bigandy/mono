@@ -1,0 +1,8 @@
+:root {
+    --ON: initial;
+    --OFF: ;
+}
+
+.sb-story {
+    padding: 1em;   
+}
