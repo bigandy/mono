@@ -21,8 +21,6 @@ class StripesClass {
     const seedValue =
       parseInt(properties.get(`--stripe-seed`)) || now.getMinutes();
 
-    console.log(seedValue);
-
     const direction: DirectionTypes =
       properties.get(`--stripe-direction`).toString().trim() || "horizontal";
 

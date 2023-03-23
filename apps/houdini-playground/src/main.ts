@@ -4,7 +4,6 @@ import snowFlakesWorkletURL from "./houdini/snowflakes.js?url";
 import stripesWorkletURL from "./houdini/stripes.js?url";
 
 if ("paintWorklet" in CSS) {
-  console.log("yes we have support");
   // @ts-ignore
   CSS.paintWorklet.addModule(snowFlakesWorkletURL);
   // @ts-ignore

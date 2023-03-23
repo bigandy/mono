@@ -9,6 +9,10 @@ function lerp(start: number, end: number, amount: number, fill?: FillType) {
   }
 }
 
+/**
+ * A Houdini Paint class to create "snowflakes"
+ * Inspired from this article: https://12daysofweb.dev/2021/houdini/
+ */
 class SnowFlakesClass {
   paint(
     ctx: CanvasRenderingContext2D,
