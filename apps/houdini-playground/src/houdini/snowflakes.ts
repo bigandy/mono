@@ -14,19 +14,27 @@ function lerp(start: number, end: number, amount: number, fill?: FillType) {
  * Inspired from this article: https://12daysofweb.dev/2021/houdini/
  */
 class SnowFlakesClass {
+  static get inputProperties() {
+    return [
+      `--snowflake-fill-hue`,
+      "--snowflake-fill-direction",
+      "--snowflake-count",
+    ];
+  }
+
   paint(
     ctx: CanvasRenderingContext2D,
     size: { width: number; height: number },
     properties: any
   ) {
-    const fillHue = parseInt(properties.get(`--snow-fill-hue`)) ?? 100;
-    const flakes = parseInt(properties.get(`--snow-flake-count`)) ?? 100;
+    const fillHue = parseInt(properties.get(`--snowflake-fill-hue`)) || 100;
+    const flakes = parseInt(properties.get(`--snowflake-count`)) || 100;
     const { width, height } = size;
 
     const min = 2;
     const max = 7;
     const fill: FillType =
-      properties.get(`--snow-fill-direction`).toString().trim() || "all";
+      properties.get(`--snowflake-fill-direction`).toString().trim() || "all";
 
     // const flakes = Math.round(100 * Math.random());
     const random = mulberry32(flakes);
@@ -47,10 +55,6 @@ class SnowFlakesClass {
       ctx.arc(point.x, point.y, lerp(min, max, random()), 0, Math.PI * 2);
       ctx.fill();
     });
-  }
-
-  static get inputProperties() {
-    return [`--snow-fill-hue`, "--snow-fill-direction", "--snow-flake-count"];
   }
 }
 // @ts-ignore
