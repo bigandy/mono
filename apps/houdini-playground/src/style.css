@@ -6,26 +6,30 @@
     background-image: paint(var(--paint-type));
   }
 
-
   .demo--border-image {
     --border-width: 20px;
-    position: relative;
-    border: none;
-    /* background-image: paint(var(--paint-type)); */
-    /* border-image-source: paint(var(--paint-type));
+    /* border: none; */
+    /* background-image: paint(var(--paint-type));  */
+    border-image-source: paint(var(--paint-type));
     border-width: var(--border-width);
     border-image-slice: 30;
     border-image-width: var(--border-width);
     border-color: orange;
     border-style: solid;
-    transition: border-image-width 300ms ease-in-out; */
+    transition: border-image-width 300ms ease-in-out;
+  }
+
+  .demo--pseudo-border-image {
+    --border-width: 20px;
+    position: relative;
+    border: none;
   }
 
 
   /* This technique allows for border-radius
   props: https://dev.to/afif/border-with-gradient-and-radius-387f
   */
-  .demo--border-image::before {
+  .demo--pseudo-border-image::before {
     content: "";
   position: absolute;
   inset: 0;

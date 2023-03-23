@@ -36,7 +36,6 @@ class SnowFlakesClass {
     const fill: FillType =
       properties.get(`--snowflake-fill-direction`).toString().trim() || "all";
 
-    // const flakes = Math.round(100 * Math.random());
     const random = mulberry32(flakes);
 
     const startPos = fill === "bottom" ? height / 2 : 0;
