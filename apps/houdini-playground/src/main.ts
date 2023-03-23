@@ -1,11 +1,17 @@
-import "./style.css";
+import "./style.scss";
 
 import snowFlakesWorkletURL from "./houdini/snowflakes.js?worker&url";
 import stripesWorkletURL from "./houdini/stripes.js?worker&url";
 import squaresWorkletURL from "./houdini/squares.js?worker&url";
+import circlesInsquaresWorkletURL from "./houdini/circlesInSquares.js?worker&url";
 
 if ("paintWorklet" in CSS) {
-  const worklets = [snowFlakesWorkletURL, stripesWorkletURL, squaresWorkletURL];
+  const worklets = [
+    snowFlakesWorkletURL,
+    stripesWorkletURL,
+    squaresWorkletURL,
+    circlesInsquaresWorkletURL,
+  ];
 
   worklets.forEach((worklet) => {
     // @ts-ignore
@@ -22,6 +28,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="demo demo--background snowflakes"></div>
     <div class="demo demo--background stripes"></div>
     <div class="demo demo--background squares"></div>
+    <div class="demo demo--background circlesInSquares"></div>
   </div>
 
   <h2>border-image</h2>
@@ -30,6 +37,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <div class="demo demo--border-image snowflakes"></div>
       <div class="demo demo--border-image stripes"></div>
       <div class="demo demo--border-image squares"></div>
+      <div class="demo demo--border-image circlesInSquares"></div>
     </div>
 
 <h2>Pseudo border-image</h2>
@@ -42,6 +50,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="demo demo--pseudo-border-image snowflakes"></div>
     <div class="demo demo--pseudo-border-image stripes"></div>
     <div class="demo demo--pseudo-border-image squares"></div>
+    <div class="demo demo--pseudo-border-image circlesInSquares"></div>
   </div>
 
 `;

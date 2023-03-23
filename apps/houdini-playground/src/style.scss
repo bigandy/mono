@@ -1,4 +1,3 @@
-
 @layer base, property, keyframes, demo;
 
 @layer demo {
@@ -8,8 +7,7 @@
 
   .demo--border-image {
     --border-width: 20px;
-    /* border: none; */
-    /* background-image: paint(var(--paint-type));  */
+
     border-image-source: paint(var(--paint-type));
     border-width: var(--border-width);
     border-image-slice: 30;
@@ -17,70 +15,80 @@
     border-color: orange;
     border-style: solid;
     transition: border-image-width 300ms ease-in-out;
+
+    &:hover {
+      --border-width: 30px;
+    }
   }
 
   .demo--pseudo-border-image {
     --border-width: 20px;
+
     position: relative;
     border: none;
-  }
 
+    &:hover {
+      --border-width: 30px;
+    }
+  }
 
   /* This technique allows for border-radius
   props: https://dev.to/afif/border-with-gradient-and-radius-387f
   */
   .demo--pseudo-border-image::before {
-    content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 30px; 
-  padding: 20px; 
-  
-  background-image: paint(var(--paint-type)); 
-  -webkit-mask: 
-     linear-gradient(#fff 0 0) content-box, 
-     linear-gradient(#fff 0 0);
-
-  -webkit-mask-composite: xor;
-  mask-composite: exclude; 
     --snowflake-count: 100;
     --snowflake-fill-hue: 250;
-  }
 
-  .demo--border-image:hover {
-    --border-width: 30px;
-  }
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    padding: var(--border-width);
+    transition: padding 300ms ease-in-out;
 
- 
+    background-image: paint(var(--paint-type));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
 
   .snowflakes {
     --snow-fill-hue: 0;
     --snow-flake-count: 100;
     --paint-type: snowflakes;
-  
-    transition: 
-      --snow-fill-hue .3s ease-in-out;
+
+    transition: --snow-fill-hue 0.3s ease-in-out;
     animation: snow linear 120s infinite;
   }
-  
+
   .stripes {
     --stripe-seed: 304;
     --stripe-count: 5;
-    
     --paint-type: stripes;
   }
-  
+
   .stripes:hover {
-     --stripe-seed: 123;
-     --stripe-count: 12;
+    --stripe-seed: 123;
+    --stripe-count: 12;
   }
 
   .squares {
     --square-seed: 1245;
-    /* --square-row-count: 4;
-    --square-column-count: 10; */
-
     --paint-type: squares;
+  }
+
+  .circlesInSquares {
+    --circle-square-seed: 23;
+    // --circle-square-row-count: 3;
+    // --circle-square-column-count: 3;
+
+    --paint-type: circlesInSquares;
+
+    // &:hover {
+    //   --circle-square-seed: 23;
+    // }
   }
 }
 
@@ -98,7 +106,7 @@
     initial-value: 0;
     inherits: false;
   }
-  
+
   @property --snow-flake-count {
     syntax: "<number>";
     initial-value: 0;
