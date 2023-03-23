@@ -1,0 +1,58 @@
+@property --snow-fill-hue {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --snow-flake-count {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.snowflakes {
+  height: 300px;
+  aspect-ratio: 1;
+  /* background-color: lightblue; */
+  border: 1px solid;
+  background-image: paint(snowflakes);
+  --snow-fill-hue: 0;
+  --snow-flake-count: 100;
+
+  transition: 
+    --snow-fill-hue .3s ease-in-out;
+
+    animation: snow linear 120s infinite;
+}
+
+.stripes {
+  height: 300px;
+  aspect-ratio: 1;
+  border: 1px solid;
+  background-image: paint(stripes);
+  
+  --stripe-seed: 304;
+  --stripe-count: 5;
+  
+}
+
+.stripes:hover {
+   /* --stripe-direction: vertical; */
+
+   --stripe-seed: 123;
+   --stripe-count: 12;
+}
+
+@keyframes snow {
+  to {
+    --snow-fill-hue: 360;
+    /* --snow-flake-count: 105; */
+  }
+  
+}
+
+
+
+body {
+  padding: 3rem;
+}
