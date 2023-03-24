@@ -1,5 +1,5 @@
 {
-  "name": "houdini-playground",
+  "name": "@bigandy/houdini-playground",
   "private": true,
   "version": "0.0.0",
   "type": "module",
