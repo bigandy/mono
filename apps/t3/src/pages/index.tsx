@@ -63,13 +63,20 @@ const AuthShowcase: React.FC = () => {
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: sessionData?.user !== undefined },
+    { enabled: sessionData?.user !== undefined }
   );
+
+  console.log({ sessionData });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
+        {sessionData && (
+          <span>
+            Logged in as {sessionData.user?.name}{" "}
+            <img src={sessionData?.user?.image ?? ""} />
+          </span>
+        )}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button

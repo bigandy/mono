@@ -4,6 +4,7 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
+import StravaProvider from "next-auth/providers/strava";
 import DiscordProvider from "next-auth/providers/discord";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "~/env.mjs";
@@ -47,6 +48,21 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
+    StravaProvider({
+      clientId: env.STRAVA_CLIENT_ID,
+      clientSecret: env.STRAVA_CLIENT_SECRET,
+      // This removes athlete from the return
+      // See: https://github.com/nextauthjs/next-auth/discussions/5279
+      token: {
+        async request({ client, params, checks, provider }) {
+          const { token_type, expires_at, refresh_token, access_token } =
+            await client.oauthCallback(provider.callbackUrl, params, checks);
+          return {
+            tokens: { token_type, expires_at, refresh_token, access_token },
+          };
+        },
+      },
+    }),
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
@@ -54,7 +70,7 @@ export const authOptions: NextAuthOptions = {
     /**
      * ...add more providers here.
      *
-     * Most other providers require a bit more work than the Discord provider. For example, the
+     * Most other providers require a bit more work than the Strava provider. For example, the
      * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
      * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
      *
