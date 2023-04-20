@@ -5,7 +5,6 @@ import {
   type DefaultSession,
 } from "next-auth";
 import StravaProvider from "next-auth/providers/strava";
-import DiscordProvider from "next-auth/providers/discord";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
@@ -22,13 +21,16 @@ declare module "next-auth" {
       id: string;
       // ...other properties
       // role: UserRole;
+      /** Oauth access token */
+      accessToken?: string;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    //   // ...other properties
+    //   // role: UserRole;
+    accessToken: string;
+  }
 }
 
 /**
@@ -38,19 +40,24 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: async ({ session, token, user }) => {
+      return session;
+    },
   },
   adapter: PrismaAdapter(prisma),
   providers: [
+    // Strava. See https://github.com/nextauthjs/next-auth/blob/main/packages/next-auth/src/providers/strava.ts
     StravaProvider({
       clientId: env.STRAVA_CLIENT_ID,
       clientSecret: env.STRAVA_CLIENT_SECRET,
+      authorization: {
+        url: "https://www.strava.com/api/v3/oauth/authorize",
+        params: {
+          scope: "profile:read_all,activity:read_all,activity:write",
+          approval_prompt: "auto",
+          response_type: "code",
+        },
+      },
       // This removes athlete from the return
       // See: https://github.com/nextauthjs/next-auth/discussions/5279
       token: {
@@ -62,10 +69,6 @@ export const authOptions: NextAuthOptions = {
           };
         },
       },
-    }),
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
     }),
     /**
      * ...add more providers here.

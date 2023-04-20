@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "~/utils/api";
+import { StravaActivity } from "~/server/api/routers/strava";
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -48,9 +49,9 @@ const Home: NextPage = () => {
             <p className="text-2xl text-white">
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
             </p>
-            <AuthShowcase />
           </div>
         </div>
+        <AuthShowcase />
       </main>
     </>
   );
@@ -61,23 +62,34 @@ export default Home;
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
 
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
+  const { data: getActivities } = api.strava.getActivities.useQuery(
+    { page: 1 },
     { enabled: sessionData?.user !== undefined }
   );
 
-  console.log({ sessionData });
-
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
+    <div className="justify-center gap-4">
+      <p className="text-2xl text-white">
         {sessionData && (
           <span>
             Logged in as {sessionData.user?.name}{" "}
             <img src={sessionData?.user?.image ?? ""} />
           </span>
         )}
-        {secretMessage && <span> - {secretMessage}</span>}
+        {/* {secretMessage && <span> - {secretMessage}</span>} */}
+        <div className="container bg-white text-base text-black">
+          {getActivities && (
+            <table className="w-full">
+              {getActivities.map((act: StravaActivity) => {
+                return (
+                  <tr key={`${act.id}`}>
+                    <td>{act.name}</td>
+                  </tr>
+                );
+              })}
+            </table>
+          )}
+        </div>
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
