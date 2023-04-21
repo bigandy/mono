@@ -20,42 +20,53 @@ export const stravaRouter = createTRPCRouter({
   getActivities: protectedProcedure
     .input(z.object({ page: z.number() }))
     .query(async ({ ctx, input }) => {
-      const getToken = await ctx.prisma.account.findFirst({
-        // where: {
-        //   userId: user.id,
-        // },
+      const account = await ctx.prisma.account.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+        },
       });
 
-      let accessToken: string | null = null;
-      if (getToken) {
-        accessToken = getToken.access_token!;
+      // let accessToken: string | null = null;
+      if (account) {
+        // accessToken = getToken.access_token!;
+
+        const { expires_at } = account;
+
+        const secondsSinceEpoch = Math.round(Date.now() / 1000);
+        let accessToken = account.access_token;
+
+        // console.log({ secondsSinceEpoch, expires_at });
+        if (secondsSinceEpoch > expires_at) {
+          console.log("need a new token");
+          const { access_token, refresh_token, expires_at } =
+            await rotateAccessToken(account.refresh_token);
+
+          accessToken = access_token;
+
+          // TODO: Replace updateMany with update.
+          const accountDerp = await ctx.prisma.account.updateMany({
+            where: {
+              userId: ctx.session.user.id,
+            },
+            data: {
+              provider: "strava",
+              access_token,
+              refresh_token,
+              expires_at,
+            },
+          });
+
+          console.log({ accountDerp });
+        } else {
+          console.log("access token is still valid. Woop!");
+        }
 
         const activities = await fetchActivities(accessToken, input.page);
 
         return activities;
       } else {
-        return "no activities";
+        return [];
       }
-
-      // return accessToken;
-
-      // return ctx.prisma.example.findMany();
-
-      // const session = await getServerSession(authOptions);
-
-      // console.log({ session });
-      // const getToken = await ctx.prisma.account.findFirst({
-      //   where: {
-      //     userId: user.id,
-      //   },
-      // });
-
-      // let accessToken: string | null = null;
-      // if (getToken) {
-      //   accessToken = getToken.access_token!;
-      // }
-
-      // return "getActivities - a WIP";
     }),
 });
 
@@ -118,31 +129,43 @@ export interface StravaActivity {
   has_kudoed: boolean;
 }
 
+const rotateAccessToken = async (refreshToken: string) => {
+  const newToken = await stravaApi.oauth.refreshToken(refreshToken);
+
+  // console.log({ newToken });
+  const { access_token, refresh_token, expires_at } = newToken;
+  // if (!access_token || !refresh_token) {
+  //   return;
+  // }
+
+  console.log("success in generating new tokens", {
+    access_token,
+    refresh_token,
+    expires_at,
+  });
+
+  return { access_token, refresh_token, expires_at };
+};
+
+const getStravaClient = (accessToken: string) => {
+  return new (stravaApi.client as any)(accessToken);
+};
+
 const fetchActivities = async (accessToken: string, page: number = 1) => {
   try {
-    const stravaAPI = new (stravaApi.client as any)(accessToken);
+    const stravaAPI = getStravaClient(accessToken);
 
     const payload = await stravaAPI.athlete.listActivities({
       page: page,
-      per_page: 10,
+      per_page: 25,
     });
 
-    // const payload = await stravaAPI.athlete.listActivities({
-    //   page: 3,
-    //   per_page: 100,
-    // });
-
-    // const token = await stravaAPI.oauth.getToken(accessToken);
-
-    // console.log({ token });
-
-    console.log({ payload });
     return payload;
-
-    // return [];
   } catch (error) {
-    console.error("error in fetchActivities", error);
-    console.error("error in fetchActivities", error?.error?.errors);
+    // @ts-ignore
+    if (error?.error?.errors[0]?.code === "invalid") {
+      return Error("invalid access token, need another");
+    }
     return Error("error in fetch activities");
   }
 };
