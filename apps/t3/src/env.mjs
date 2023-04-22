@@ -44,7 +44,6 @@ const processEnv = {
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   STRAVA_CLIENT_ID: process.env.STRAVA_CLIENT_ID,
   STRAVA_CLIENT_SECRET: process.env.STRAVA_CLIENT_SECRET,
-  // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
 // Don't touch the part below

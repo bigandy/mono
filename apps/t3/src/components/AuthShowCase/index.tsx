@@ -12,7 +12,9 @@ import Button from "~/components/Button";
 
 const AuthShowcase: React.FC = () => {
   const [isMetric, setIsMetric] = useState(false);
-  const [activity, setActivity] = useState<{ id: string; name: string }>(null);
+  const [activity, setActivity] = useState<{ id: string; name: string } | null>(
+    null
+  );
   const { data: sessionData } = useSession();
   const [page, setPage] = useState(1);
 

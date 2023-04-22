@@ -43,7 +43,7 @@ export const stravaRouter = createTRPCRouter({
   convertActivity: protectedProcedure
     .input(
       z.object({
-        activityId: z.string(),
+        activityId: z.string().optional(),
         activityName: z.string().optional(),
       })
     )
@@ -62,7 +62,7 @@ export const stravaRouter = createTRPCRouter({
         },
       });
 
-      if (account) {
+      if (account && input.activityId && input.activityName) {
         const accessToken = await getAccessToken(account, ctx);
         const res = await updateActivity(
           accessToken,
