@@ -1,14 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { signIn, signOut, useSession } from "next-auth/react";
 
-import { api } from "~/utils/api";
-import { StravaActivity } from "~/server/api/routers/strava";
+import AuthShowcase from "~/components/AuthShowCase";
 
 const Home: NextPage = () => {
-  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
-  // console.log(hello.)
   return (
     <>
       <Head>
@@ -24,56 +19,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: getActivities } = api.strava.getActivities.useQuery(
-    { page: 1 },
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={
-          sessionData ? () => void signOut() : () => void signIn("strava")
-        }
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-      <p className="text-2xl text-white">
-        {sessionData && (
-          <span>
-            Logged in as {sessionData.user?.name}{" "}
-            <img src={sessionData?.user?.image ?? ""} className="my-4" />
-          </span>
-        )}
-      </p>
-
-      {getActivities && getActivities.length > 0 && (
-        <div className="container mt-4 bg-white p-4 text-base text-black">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Distance</th>
-                <th>Activity Type</th>
-              </tr>
-            </thead>
-            {getActivities.map((act: StravaActivity) => {
-              return (
-                <tr key={`${act.id}`}>
-                  <td>{act.name}</td>
-                  <td>{act.distance}</td>
-                  <td>{act.type}</td>
-                </tr>
-              );
-            })}
-          </table>
-        </div>
-      )}
-    </div>
-  );
-};
