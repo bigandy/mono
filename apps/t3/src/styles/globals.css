@@ -16,3 +16,13 @@ table {
   table-layout: fixed;
   width: 100%;
 }
+
+
+th {
+  vertical-align: top;
+}
+
+input, 
+label {
+  @apply cursor-pointer;
+}
