@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 
-import StravaActivitiesTable from "~/components/StravaActivitiesTable";
+import StravaActivitiesTable from "~/components/StravaActivities";
 import BasicLayout from "~/layouts/BasicLayout";
 
 const ActivitiesPage: NextPage = () => {
