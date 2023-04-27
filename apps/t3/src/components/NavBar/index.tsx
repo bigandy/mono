@@ -1,13 +1,12 @@
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 import StravaLogo from "../../../public/images/strava.svg";
 
 import { signOut, signIn, useSession } from "next-auth/react";
-import Button from "~/components/Button";
 
 function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(" ");
