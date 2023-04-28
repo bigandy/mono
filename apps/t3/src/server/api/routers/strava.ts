@@ -4,6 +4,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 import stravaApi from "strava-v3";
 
+export const revalidate = 3600; // revalidate this page every 60 * 60 i.e. 1 hour seconds
+
 const getAccessToken = async (account: any, ctx: any) => {
   const expires_at = account.expires_at!;
 

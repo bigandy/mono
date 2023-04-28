@@ -15,6 +15,8 @@ import {
 } from "~/utils/conversion";
 import { StravaActivity } from "~/server/api/routers/strava";
 
+import Button from "~/components/Button";
+
 const METERS_TO_KMH = 3.6;
 const METERS_TO_MPH = 2.23694;
 
@@ -153,7 +155,10 @@ const StravaTable = ({
     // console.log("changing");
     const rowModal = table.getSelectedRowModel();
     console.log(rowModal.flatRows.map((row) => row.original.id));
+    return rowModal.flatRows.map((row) => row.original.id);
   }, [rowSelection]);
+
+  const activitiesCount = selectedActivities.length;
 
   return (
     <div className="p-2">
@@ -186,6 +191,35 @@ const StravaTable = ({
           ))}
         </tbody>
       </table>
+      <StravaTableActionBar
+        onReset={() => table.resetRowSelection()}
+        count={activitiesCount}
+      />
+    </div>
+  );
+};
+
+/**
+ * Strava Table Action Bar is a bar that shows when the user has
+ * selected some rows on the table. The purpose of the bar is to allow
+ * the user to choose what they want to do with the selected items.
+ * @param count number
+ * @returns JSX.Element
+ */
+const StravaTableActionBar = ({
+  count,
+  onReset,
+}: {
+  count: number;
+  onReset: () => void;
+}) => {
+  if (count === 0) {
+    return null;
+  }
+  return (
+    <div className="fixed bottom-0 left-0 flex w-screen items-center gap-4 border bg-white p-4">
+      <p>You have selected {count} activities</p>
+      <Button handleClick={onReset}>Reset</Button>
     </div>
   );
 };
