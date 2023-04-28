@@ -76,7 +76,7 @@ export const stravaRouter = createTRPCRouter({
       // return { message: "success" };
     }),
   getActivities: protectedProcedure
-    .input(z.object({ page: z.number() }))
+    .input(z.object({ page: z.number(), activities_count: z.number() }))
     .query(async ({ ctx, input }) => {
       // Get the associated tokens: access_token, refresh_token, and expires_at
       const account = await ctx.prisma.account.findFirst({
@@ -87,7 +87,11 @@ export const stravaRouter = createTRPCRouter({
 
       if (account) {
         const accessToken = await getAccessToken(account, ctx);
-        const activities = await fetchActivities(accessToken, input.page);
+        const activities = await fetchActivities(
+          accessToken,
+          input.page,
+          input.activities_count
+        );
 
         return activities;
       } else {
@@ -173,13 +177,17 @@ const getStravaClient = (accessToken: string) => {
   return new (stravaApi.client as any)(accessToken);
 };
 
-const fetchActivities = async (accessToken: string, page: number = 1) => {
+const fetchActivities = async (
+  accessToken: string,
+  page: number = 1,
+  activities_count: number = 10
+) => {
   try {
     const stravaAPI = getStravaClient(accessToken);
 
     const payload = await stravaAPI.athlete.listActivities({
       page: page,
-      per_page: 25,
+      per_page: activities_count,
     });
 
     return payload;

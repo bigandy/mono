@@ -1,7 +1,13 @@
-
-import {useMemo} from 'react';
+import { useMemo, useEffect, useRef, type HTMLProps, useState } from "react";
 import { format } from "date-fns";
-import { useTable } from 'react-table'; 
+
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  type TableOptions,
+} from "@tanstack/react-table";
 
 import {
   convertMetersToKilometers,
@@ -9,124 +15,179 @@ import {
 } from "~/utils/conversion";
 import { StravaActivity } from "~/server/api/routers/strava";
 
-
 const METERS_TO_KMH = 3.6;
 const METERS_TO_MPH = 2.23694;
 
-const COLUMNS = [
-    {
-      Header: 'Date',
-      accessor: 'start_date',
-      Cell: ({ value }: {value: string}) => {
-        return format(
-            new Date(value),
-            "dd-MM-yyyy 'at' h:mm aaa"
-          )
-      }
+const columnHelper = createColumnHelper<StravaActivity>();
+
+const columns = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <IndeterminateCheckbox
+        {...{
+          checked: table.getIsAllRowsSelected(),
+          indeterminate: table.getIsSomeRowsSelected(),
+          onChange: table.getToggleAllRowsSelectedHandler(),
+        }}
+      />
+    ),
+    cell: ({ row }) => (
+      <div className="px-1">
+        <IndeterminateCheckbox
+          {...{
+            checked: row.getIsSelected(),
+            disabled: !row.getCanSelect(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+        />
+      </div>
+    ),
+  },
+  columnHelper.accessor("start_date", {
+    header: "Date",
+    cell: (info) => {
+      return format(new Date(info.getValue()), "dd-MM-yyyy 'at' h:mm aaa");
     },
-    {
-      Header: 'Name',
-      accessor: 'name',
+  }),
+  columnHelper.accessor("name", {
+    header: "Name",
+    cell: (info) => info.renderValue(),
+  }),
+  columnHelper.accessor("distance", {
+    header: ({ table }) => {
+      return (
+        <>
+          Distance
+          <br />
+          <small>({table?.options?.meta?.distanceUnit})</small>
+        </>
+      );
     },
-    {
-        Header: ({ distanceUnit}: { distanceUnit: string;}) => {
-            return (
-                <>
-                Distance
-                <br />
-                <small>({distanceUnit})</small>
-                </>
-            );
-        },
-        accessor: "distance",
-        Cell: ({value, isMetric, distanceUnit }: {value: number; isMetric: boolean; distanceUnit: string;}) => {
-            const distance = isMetric
-                  ? convertMetersToKilometers(value)
-                  : convertMetersToMiles(value);
-            return `${distance} ${distanceUnit}`;
-        }
-    }, 
-    {
-        Header: "Activity Type",
-        accessor: "type"
+    cell: ({ getValue, table }) => {
+      const distance = table.options.meta.isMetric
+        ? convertMetersToKilometers(getValue())
+        : convertMetersToMiles(getValue());
+      return `${distance} ${table.options.meta.distanceUnit}`;
     },
-    {
-        Header: ({speedUnit}: {speedUnit: string;}) => {
-            return (
-                <>
-                Average Speed
-                 <br />
-                 <small>({speedUnit})</small></>
-            )
-        },
-        accessor: "average_speed",
-        Cell: ({value, isMetric, speedUnit }: {value: number; isMetric: boolean; speedUnit: string;}) => {
+  }),
+  columnHelper.accessor("type", {
+    header: "Activity Type",
+  }),
 
-            const averageSpeed = isMetric
-                  ? value * METERS_TO_KMH
-                  : value * METERS_TO_MPH;
-            return `${averageSpeed.toFixed(2)} ${speedUnit}`;
-        }
+  columnHelper.accessor("average_speed", {
+    header: ({ table }) => {
+      return (
+        <>
+          Average Speed
+          <br />
+          <small>({table.options.meta.speedUnit})</small>
+        </>
+      );
     },
-    {
-        Header: "Private",
-        accessor: "private",
-        Cell: ({value }: {value: boolean; }) => {
-            return `${value ? 'private' : ""}`;
-        }
+    cell: ({ table, getValue }) => {
+      const averageSpeed = table.options.meta.isMetric
+        ? getValue() * METERS_TO_KMH
+        : getValue() * METERS_TO_MPH;
+      return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
     },
+  }),
+  columnHelper.accessor("private", {
+    header: "Private?",
+    cell: ({ getValue }) => (getValue() ? "private" : ""),
+  }),
+];
 
-  ];
+function IndeterminateCheckbox({
+  indeterminate,
+  className = "",
+  ...rest
+}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+  const ref = useRef<HTMLInputElement>(null!);
 
-const StravaTable = ({data, isMetric}: { data: StravaActivity[], isMetric: boolean; }) => {
-    const speedUnit = isMetric ? "km/h" : "mph";
-    const distanceUnit = isMetric ? "km" : "miles";
+  useEffect(() => {
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [ref, indeterminate]);
 
-    const columns = useMemo(() => COLUMNS, []);
+  return (
+    <input
+      type="checkbox"
+      ref={ref}
+      className={className + " cursor-pointer"}
+      {...rest}
+    />
+  );
+}
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow
-      } = useTable({
-        // @ts-ignore
-        columns,
-        data,
-        isMetric,
-        distanceUnit,
-        speedUnit
-      });
+const StravaTable = ({
+  data,
+  isMetric,
+}: {
+  data: StravaActivity[];
+  isMetric: boolean;
+}) => {
+  const speedUnit = isMetric ? "km/h" : "mph";
+  const distanceUnit = isMetric ? "km" : "miles";
+  const [rowSelection, setRowSelection] = useState({});
 
-    return (
-        <table {...getTableProps()}>
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
+    meta: {
+      speedUnit,
+      distanceUnit,
+      isMetric,
+    },
+  });
+
+  const selectedActivities = useMemo(() => {
+    // console.log("changing");
+    const rowModal = table.getSelectedRowModel();
+    console.log(rowModal.flatRows.map((row) => row.original.id));
+  }, [rowSelection]);
+
+  return (
+    <div className="p-2">
+      <table>
         <thead>
-          {headerGroups.map((headerGroup: any) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column: any) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </th>
               ))}
             </tr>
           ))}
         </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: any) => {
-            prepareRow(row);
-
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell: any) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                  );
-                })}
-              </tr>
-            );
-          })}
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
-        </table>
-    )
+      </table>
+    </div>
+  );
 };
 
 export default StravaTable;

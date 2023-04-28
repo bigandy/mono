@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  overflow-y: scroll;
+}
+
 th {
   text-align: left;
 }
@@ -17,12 +21,19 @@ table {
   width: 100%;
 }
 
-
 th {
   vertical-align: top;
 }
 
-input, 
+input,
 label {
   @apply cursor-pointer;
+}
+
+th:first-child,
+td:first-child {
+  width: 40px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
 }
