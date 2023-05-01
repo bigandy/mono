@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  type TableOptions,
 } from "@tanstack/react-table";
 
 import {
@@ -25,7 +24,7 @@ const columnHelper = createColumnHelper<StravaActivity>();
 const columns = [
   {
     id: "select",
-    header: ({ table }) => (
+    header: ({ table }: { table: any }) => (
       <IndeterminateCheckbox
         {...{
           checked: table.getIsAllRowsSelected(),
@@ -34,7 +33,7 @@ const columns = [
         }}
       />
     ),
-    cell: ({ row }) => (
+    cell: ({ row }: { row: any }) => (
       <div className="px-1">
         <IndeterminateCheckbox
           {...{
@@ -47,6 +46,10 @@ const columns = [
       </div>
     ),
   },
+  columnHelper.accessor("id", {
+    header: "id",
+    cell: (info) => info.getValue(),
+  }),
   columnHelper.accessor("start_date", {
     header: "Date",
     cell: (info) => {
