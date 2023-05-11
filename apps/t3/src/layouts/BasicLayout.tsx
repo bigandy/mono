@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-import { signIn,  useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import NavBar from "~/components/NavBar";
@@ -21,21 +21,15 @@ const BasicLayout = ({ title, children }: Props) => {
       <NavBar />
       <header className="w-full px-10 pt-4">
         <div className="container mx-auto">
-
-        {!sessionData && (
-          <Button
-          handleClick={
-            () => void signIn("strava")
-          }
-        >
-          {"Sign in"}
-        </Button>
-        )}
-          
+          {!sessionData && (
+            <Button handleClick={() => void signIn("strava")}>
+              {"Sign in"}
+            </Button>
+          )}
         </div>
       </header>
       <main className="w-full p-10">
-        <div className="container  mx-auto">
+        <div className="container  mx-auto  max-w-7xl px-2 sm:px-6 lg:px-8">
           <Heading as="h1">{title}</Heading>
           {children}
         </div>
@@ -45,5 +39,3 @@ const BasicLayout = ({ title, children }: Props) => {
 };
 
 export default BasicLayout;
-
-

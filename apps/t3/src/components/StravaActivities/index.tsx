@@ -47,13 +47,16 @@ const StravaActivities: React.FC = () => {
           />
         </div>
       </div>
-      <div className="container mt-10 text-base text-black">
+      <div className="container  mt-4 text-base text-black">
         <Heading as="h2">Strava Data</Heading>
 
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          <StravaTable data={getActivities} isMetric={isMetric} />
+          <StravaTable
+            data={getActivities ? getActivities : []}
+            isMetric={isMetric}
+          />
         )}
 
         {page > 1 && (

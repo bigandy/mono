@@ -1,4 +1,11 @@
-import { useMemo, useEffect, useRef, type HTMLProps, useState } from "react";
+import {
+  useMemo,
+  useEffect,
+  useRef,
+  type HTMLProps,
+  useState,
+  Fragment,
+} from "react";
 import { format } from "date-fns";
 
 import {
@@ -13,6 +20,8 @@ import {
   convertMetersToMiles,
 } from "~/utils/conversion";
 import { StravaActivity } from "~/server/api/routers/strava";
+
+import { api } from "~/utils/api";
 
 import Button from "~/components/Button";
 
@@ -118,6 +127,7 @@ function IndeterminateCheckbox({
   }, [ref, indeterminate]);
 
   return (
+    // @ts-ignore
     <input
       type="checkbox"
       ref={ref}
@@ -131,12 +141,15 @@ const StravaTable = ({
   data,
   isMetric,
 }: {
-  data: StravaActivity[];
+  data: StravaActivity[] | [];
   isMetric: boolean;
 }) => {
   const speedUnit = isMetric ? "km/h" : "mph";
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
+
+  const oneMutation = api.strava.saveOneActivity.useMutation();
+  const manyMutation = api.strava.saveManyActivities.useMutation();
 
   const table = useReactTable({
     data,
@@ -163,8 +176,39 @@ const StravaTable = ({
 
   const activitiesCount = selectedActivities.length;
 
+  const handleSaveOne = async () => {
+    // 1. what is the id of the selected row?
+    const activityId = selectedActivities[0];
+    // 2. fire off the saveActivity mutation
+
+    const thing = await oneMutation.mutateAsync({
+      activityId,
+    });
+    // finally: reset the selection
+    if (thing.message === "success") {
+      table.resetRowSelection();
+    }
+    console.log({ thing });
+  };
+
+  const handleSaveAll = async () => {
+    // // 1. what is the id of the selected row?
+    // const activityId = selectedActivities;
+    // // 2. fire off the saveActivity mutation
+    const thing = await manyMutation.mutateAsync({
+      activityIds: selectedActivities,
+    });
+    // // finally: reset the selection
+    if (thing.message === "success") {
+      table.resetRowSelection();
+    }
+    // console.log({ thing });
+  };
+
+  // console.log(mutation.isSuccess);
+
   return (
-    <div className="p-2">
+    <Fragment>
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -196,9 +240,11 @@ const StravaTable = ({
       </table>
       <StravaTableActionBar
         onReset={() => table.resetRowSelection()}
+        onSaveOne={handleSaveOne}
+        onSaveAll={handleSaveAll}
         count={activitiesCount}
       />
-    </div>
+    </Fragment>
   );
 };
 
@@ -212,17 +258,25 @@ const StravaTable = ({
 const StravaTableActionBar = ({
   count,
   onReset,
+  onSaveOne,
+  onSaveAll,
 }: {
   count: number;
   onReset: () => void;
+  onSaveOne: () => void;
+  onSaveAll: () => void;
 }) => {
   if (count === 0) {
     return null;
   }
   return (
-    <div className="fixed bottom-0 left-0 flex w-screen items-center gap-4 border bg-white p-4">
-      <p>You have selected {count} activities</p>
-      <Button handleClick={onReset}>Reset</Button>
+    <div className="fixed bottom-0 left-0   w-screen border bg-white p-4">
+      <div className="container  mx-auto  flex max-w-7xl items-center gap-4 px-2 sm:px-6 lg:px-8">
+        <p>You have selected {count} activities</p>
+        {count === 1 && <Button handleClick={onSaveOne}>Save ONE to DB</Button>}
+        {count > 1 && <Button handleClick={onSaveAll}>Save ALL to DB</Button>}
+        <Button handleClick={onReset}>Reset</Button>
+      </div>
     </div>
   );
 };
