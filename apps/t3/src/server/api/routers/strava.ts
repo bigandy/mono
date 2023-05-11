@@ -4,8 +4,6 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 import stravaApi from "strava-v3";
 
-export const revalidate = 3600; // revalidate this page every 60 * 60 i.e. 1 hour seconds
-
 const getAccessToken = async (account: any, ctx: any) => {
   const expires_at = account.expires_at!;
 
@@ -42,14 +40,14 @@ const getAccessToken = async (account: any, ctx: any) => {
 };
 
 export const stravaRouter = createTRPCRouter({
-  convertActivity: protectedProcedure
+  convertOneActivity: protectedProcedure
     .input(
       z.object({
         activityId: z.string().optional(),
         activityName: z.string().optional(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       if (input.activityId === "" && input.activityName !== "") {
         return {
           message: "no activity id",
@@ -77,6 +75,84 @@ export const stravaRouter = createTRPCRouter({
 
       // return { message: "success" };
     }),
+  saveOneActivity: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      if (!input.activityId) {
+        return {
+          message: "no activity id",
+        };
+      }
+      // console.log("convert this activity: ", input);
+
+      // Get the associated tokens: access_token, refresh_token, and expires_at
+      // const account = await ctx.prisma.account.findFirst({
+      //   where: {
+      //     userId: ctx.session.user.id,
+      //   },
+      // });
+
+      // if (account && input.activityId && input.activityName) {
+      //   const accessToken = await getAccessToken(account, ctx);
+      //   const res = await updateActivity(
+      //     accessToken,
+      //     input.activityId,
+      //     input.activityName
+      //   );
+
+      //   return { message: "success", res };
+      // }
+      console.log("save one Activity please");
+      // const selectedActivity = activities.find(
+      //   (act) => act.id === input.activityId
+      // );
+      // console.log(selectedActivity);
+
+      return { message: "success" };
+    }),
+  saveManyActivities: protectedProcedure
+    .input(
+      z.object({
+        activityIds: z.array(z.number()).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.activityIds?.length === 0) {
+        return {
+          message: "no activity ids",
+        };
+      }
+      // console.log("convert this activity: ", input);
+
+      // Get the associated tokens: access_token, refresh_token, and expires_at
+      // const account = await ctx.prisma.account.findFirst({
+      //   where: {
+      //     userId: ctx.session.user.id,
+      //   },
+      // });
+
+      // if (account && input.activityId && input.activityName) {
+      //   const accessToken = await getAccessToken(account, ctx);
+      //   const res = await updateActivity(
+      //     accessToken,
+      //     input.activityId,
+      //     input.activityName
+      //   );
+
+      //   return { message: "success", res };
+      // }
+      console.log("save many Activities please", input.activityIds);
+      // const selectedActivity = activities.find(
+      //   (act) => act.id === input.activityId
+      // );
+      // console.log(selectedActivity);
+
+      return { message: "success" };
+    }),
   getActivities: protectedProcedure
     .input(z.object({ page: z.number(), activities_count: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -89,13 +165,15 @@ export const stravaRouter = createTRPCRouter({
 
       if (account) {
         const accessToken = await getAccessToken(account, ctx);
-        const activities = await fetchActivities(
+        const fetchedActivities: StravaActivity[] = await fetchActivities(
           accessToken,
           input.page,
           input.activities_count
         );
 
-        return activities;
+        // activities.push(...fetchedActivities);
+
+        return fetchedActivities;
       } else {
         return [];
       }

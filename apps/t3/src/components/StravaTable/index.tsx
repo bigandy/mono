@@ -140,8 +140,10 @@ function IndeterminateCheckbox({
 const StravaTable = ({
   data,
   isMetric,
+  reloadData,
 }: {
   data: StravaActivity[] | [];
+  reloadData: () => void;
   isMetric: boolean;
 }) => {
   const speedUnit = isMetric ? "km/h" : "mph";
@@ -150,6 +152,7 @@ const StravaTable = ({
 
   const oneMutation = api.strava.saveOneActivity.useMutation();
   const manyMutation = api.strava.saveManyActivities.useMutation();
+  const convertMutation = api.strava.convertOneActivity.useMutation();
 
   const table = useReactTable({
     data,
@@ -170,7 +173,7 @@ const StravaTable = ({
   const selectedActivities = useMemo(() => {
     // console.log("changing");
     const rowModal = table.getSelectedRowModel();
-    console.log(rowModal.flatRows.map((row) => row.original.id));
+    // console.log(rowModal.flatRows.map((row) => row.original.id));
     return rowModal.flatRows.map((row) => row.original.id);
   }, [rowSelection]);
 
@@ -189,6 +192,29 @@ const StravaTable = ({
       table.resetRowSelection();
     }
     console.log({ thing });
+  };
+
+  const handleConvertOne = async () => {
+    const activityId = selectedActivities[0];
+    const activity = table
+      .getSelectedRowModel()
+      .flatRows.find((row) => row.original.id === activityId);
+
+    if (!activity || activity.original.type !== "Run") {
+      table.resetRowSelection();
+    } else {
+      const mutation = await convertMutation.mutateAsync({
+        activityId: activity.original.id.toString(),
+        activityName: activity.original.name,
+      });
+
+      if (mutation?.message === "success") {
+        reloadData();
+        table.resetRowSelection();
+      }
+    }
+    // console.log({ original: activity.original });
+    return;
   };
 
   const handleSaveAll = async () => {
@@ -243,6 +269,7 @@ const StravaTable = ({
         onSaveOne={handleSaveOne}
         onSaveAll={handleSaveAll}
         count={activitiesCount}
+        onConvertOne={handleConvertOne}
       />
     </Fragment>
   );
@@ -260,11 +287,13 @@ const StravaTableActionBar = ({
   onReset,
   onSaveOne,
   onSaveAll,
+  onConvertOne,
 }: {
   count: number;
   onReset: () => void;
   onSaveOne: () => void;
   onSaveAll: () => void;
+  onConvertOne: () => void;
 }) => {
   if (count === 0) {
     return null;
@@ -274,6 +303,9 @@ const StravaTableActionBar = ({
       <div className="container  mx-auto  flex max-w-7xl items-center gap-4 px-2 sm:px-6 lg:px-8">
         <p>You have selected {count} activities</p>
         {count === 1 && <Button handleClick={onSaveOne}>Save ONE to DB</Button>}
+        {count === 1 && (
+          <Button handleClick={onConvertOne}>Convert ONE in Strava</Button>
+        )}
         {count > 1 && <Button handleClick={onSaveAll}>Save ALL to DB</Button>}
         <Button handleClick={onReset}>Reset</Button>
       </div>

@@ -13,7 +13,11 @@ const StravaActivities: React.FC = () => {
   const { data: sessionData } = useSession();
   const [page, setPage] = useState(1);
 
-  const { data: getActivities, isLoading } = api.strava.getActivities.useQuery(
+  const {
+    data: getActivities,
+    isLoading,
+    refetch,
+  } = api.strava.getActivities.useQuery(
     { page: page, activities_count: 10 },
     { enabled: sessionData?.user !== undefined }
   );
@@ -56,6 +60,7 @@ const StravaActivities: React.FC = () => {
           <StravaTable
             data={getActivities ? getActivities : []}
             isMetric={isMetric}
+            reloadData={refetch}
           />
         )}
 
