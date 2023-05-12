@@ -1,3 +1,29 @@
+# T3 Strava Tauri App
+
+## TODO:
+
+### Grabbing Data from Strava
+
+- [ ] Save all available data from Strava to the DB. In the short-term this can be 100 activities or similar
+- [ ] Have ability to regularly sync this data to the DB. Every 4 hours or so?
+- [ ] Have ability to press a button to sync the data
+
+### Update Strava activities from this app
+
+#### Single Activity
+
+- [ ] edit one activity in Strava (editable fields should only be name/comments/type)
+- [ ] editing this one activity should also update the local DB (should it be DB first or Strava API first?)
+- [ ] optimistic update so the UI feels super quick
+- [ ] on success show success toast
+- [ ] if error, show error toast, and roll back the UI change
+
+#### Multiple Activities
+
+- [ ] do above but for multiple activities (e.g. bulk conversion from Run => Walk, for example)
+
+---
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
