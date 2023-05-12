@@ -22,9 +22,7 @@ const BasicLayout = ({ title, children }: Props) => {
       <header className="w-full px-10 pt-4">
         <div className="container mx-auto">
           {!sessionData && (
-            <Button handleClick={() => void signIn("strava")}>
-              {"Sign in"}
-            </Button>
+            <Button onClick={() => void signIn("strava")}>{"Sign in"}</Button>
           )}
         </div>
       </header>

@@ -1,6 +1,5 @@
-interface Props extends React.PropsWithChildren {
-  handleClick: () => void;
-  className?: string;
+// Whoah, just learned about React.ComponentProps from https://www.youtube.com/shorts/Rf_k8kSAFU0 nice!
+interface Props extends React.ComponentProps<"button"> {
   primary?: boolean;
   secondary?: boolean;
 }
@@ -8,7 +7,7 @@ interface Props extends React.PropsWithChildren {
 const Button = ({
   primary,
   secondary,
-  handleClick,
+  onClick,
   children,
   className,
   ...props
@@ -23,7 +22,7 @@ const Button = ({
   return (
     <button
       className={`rounded-full border bg-white ${paddingClass} font-semibold text-black no-underline transition hover:bg-white/80 ${className}`}
-      onClick={handleClick}
+      onClick={onClick}
       {...props}
     >
       {children}

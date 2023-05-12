@@ -64,13 +64,15 @@ const StravaActivities: React.FC = () => {
           />
         )}
 
-        {page > 1 && (
-          <Button className="mr-4 mt-4 " handleClick={handlePreviousPage}>
-            &larr; Get Previous Page ({page - 1})
-          </Button>
-        )}
+        <Button
+          disabled={page < 1}
+          className="mr-4 mt-4 "
+          onClick={handlePreviousPage}
+        >
+          &larr; Get Previous Page ({page - 1})
+        </Button>
 
-        <Button className="mt-4" handleClick={handleNextPage}>
+        <Button className="mt-4" onClick={handleNextPage}>
           Get Next Page ({page + 1}) &rarr;
         </Button>
       </div>

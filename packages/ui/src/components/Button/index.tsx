@@ -1,8 +1,7 @@
 import "./styles.css";
 import clsx from "clsx";
 
-interface Props extends React.PropsWithChildren {
-  onClick?: () => void;
+interface Props extends React.ComponentProps<"button"> {
   primary?: boolean;
 }
 

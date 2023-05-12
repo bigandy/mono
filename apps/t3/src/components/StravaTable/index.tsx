@@ -302,12 +302,12 @@ const StravaTableActionBar = ({
     <div className="fixed bottom-0 left-0   w-screen border bg-white p-4">
       <div className="container  mx-auto  flex max-w-7xl items-center gap-4 px-2 sm:px-6 lg:px-8">
         <p>You have selected {count} activities</p>
-        {count === 1 && <Button handleClick={onSaveOne}>Save ONE to DB</Button>}
+        {count === 1 && <Button onClick={onSaveOne}>Save ONE to DB</Button>}
         {count === 1 && (
-          <Button handleClick={onConvertOne}>Convert ONE in Strava</Button>
+          <Button onClick={onConvertOne}>Convert ONE in Strava</Button>
         )}
-        {count > 1 && <Button handleClick={onSaveAll}>Save ALL to DB</Button>}
-        <Button handleClick={onReset}>Reset</Button>
+        {count > 1 && <Button onClick={onSaveAll}>Save ALL to DB</Button>}
+        <Button onClick={onReset}>Reset</Button>
       </div>
     </div>
   );
