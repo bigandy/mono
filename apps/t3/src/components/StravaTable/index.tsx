@@ -19,7 +19,7 @@ import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
-import { StravaActivity } from "~/server/api/routers/strava";
+import { StravaActivity } from "~/server/api/routers/utils/strava";
 
 import { api } from "~/utils/api";
 
@@ -191,7 +191,7 @@ const StravaTable = ({
     if (thing.message === "success") {
       table.resetRowSelection();
     }
-    console.log({ thing });
+    // console.log({ thing });
   };
 
   const handleConvertOne = async () => {

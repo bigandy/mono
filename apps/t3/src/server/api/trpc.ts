@@ -53,6 +53,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
 
+  // console.log("createTRPCContext", { session });
+
   return createInnerTRPCContext({
     session,
   });
@@ -119,6 +121,37 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
+const getUserAccount = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const account = await ctx.prisma.account.findFirst({
+    where: {
+      userId: ctx.session.user.id,
+    },
+  });
+
+  if (!account) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  // console.log("GETTING ACCOUNT FROM DB: ", account);
+
+  return next({
+    ctx: {
+      session: {
+        ...ctx.session,
+        account: {
+          access_token: account.access_token!,
+          expires_at: account.expires_at!,
+          refresh_token: account.refresh_token!,
+        },
+      },
+    },
+  });
+});
+
 /**
  * Protected (authenticated) procedure
  *
@@ -128,3 +161,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+export const protectedProcedureWithAccount = t.procedure
+  .use(enforceUserIsAuthed)
+  .use(getUserAccount);

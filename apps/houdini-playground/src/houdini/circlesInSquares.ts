@@ -61,7 +61,6 @@ class CirclesInSquares {
         // three-quarter-circle at 1.5
         // full circle at 2
         const getQuarter = () => (Math.ceil(random() * 4) / 4) * 2;
-        console.log(getQuarter());
 
         const radius = stripeWidth / (2 + 2 * random());
         const x = i * stripeWidth + 0.5 * stripeWidth;

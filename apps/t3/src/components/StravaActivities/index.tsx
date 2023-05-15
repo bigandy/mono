@@ -28,25 +28,25 @@ const StravaActivities: React.FC = () => {
   return (
     <div>
       <div className="flex">
-        <div className="mr-4 cursor-pointer " onClick={() => setIsMetric(true)}>
+        <div className="mr-4 cursor-pointer ">
           <label htmlFor="metric">Metric</label>
           <input
             type="radio"
             name="unitSelector"
             id="metric"
             checked={isMetric}
-            // onChange={() => setIsMetric(true)}
+            onChange={() => setIsMetric(true)}
             className="ml-2"
           />
         </div>
-        <div className="cursor-pointer " onClick={() => setIsMetric(false)}>
+        <div className="cursor-pointer ">
           <label htmlFor="imperial">Imperial</label>
           <input
             type="radio"
             name="unitSelector"
             id="imperial"
             checked={!isMetric}
-            // onChange={() => setIsMetric(false)}
+            onChange={() => setIsMetric(false)}
             className="ml-2"
           />
         </div>

@@ -2,26 +2,28 @@
 interface Props extends React.ComponentProps<"button"> {
   primary?: boolean;
   secondary?: boolean;
+  big?: boolean;
 }
 
 const Button = ({
   primary,
   secondary,
+  big,
   onClick,
   children,
   className,
   ...props
 }: Props) => {
-  let paddingClass = "px-5 py-1";
+  let classes = "bg-white hover:bg-white/80 text-black px-5 py-1";
   if (primary) {
-    paddingClass = "px-10 py-3";
+    classes = "bg-black text-white hover:bg-black/60 active:bg-black/80";
   }
-  if (secondary) {
-    paddingClass = "px-5 py-1";
+  if (big) {
+    classes += " px-10 py-4";
   }
   return (
     <button
-      className={`rounded-full border bg-white ${paddingClass} font-semibold text-black no-underline transition hover:bg-white/80 ${className}`}
+      className={`rounded-full border    ${classes} font-semibold  no-underline transition  ${className}`}
       onClick={onClick}
       {...props}
     >
