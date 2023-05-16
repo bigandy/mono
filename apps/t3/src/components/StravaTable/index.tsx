@@ -13,7 +13,7 @@ import {
   convertMetersToMiles,
 } from "~/utils/conversion";
 import {
-  type StravaActivity,
+  type IStravaActivity,
   type ActivityKeys,
 } from "~/server/api/routers/utils/strava";
 
@@ -26,7 +26,7 @@ import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
 const METERS_TO_KMH = 3.6;
 const METERS_TO_MPH = 2.23694;
 
-const columnHelper = createColumnHelper<StravaActivity>();
+const columnHelper = createColumnHelper<IStravaActivity>();
 
 const StravaTable = ({
   data,
@@ -34,7 +34,7 @@ const StravaTable = ({
   reloadData,
   columnsToShow,
 }: {
-  data: StravaActivity[] | [];
+  data: IStravaActivity[] | [];
   reloadData: () => void;
   isMetric: boolean;
   columnsToShow: ActivityKeys[];
@@ -46,11 +46,11 @@ const StravaTable = ({
 
   const columns = useMemo(() => {
     const listOfColumns = [
-      columnHelper.accessor("id", {
-        header: "ID",
-        id: "id",
-        cell: (info) => info.getValue(),
-      }),
+      // columnHelper.accessor("id", {
+      //   header: "ID",
+      //   id: "id",
+      //   cell: (info) => info.getValue(),
+      // }),
       columnHelper.accessor("start_date", {
         header: "Date",
         id: "start_date",
@@ -84,6 +84,10 @@ const StravaTable = ({
       columnHelper.accessor("type", {
         header: "Activity Type",
         id: "type",
+      }),
+      columnHelper.accessor("total_elevation_gain", {
+        header: "Elevation Gain",
+        id: "total_elevation_gain",
       }),
 
       columnHelper.accessor("average_speed", {
@@ -146,6 +150,12 @@ const StravaTable = ({
         ),
       },
       ...columns,
+      columnHelper.accessor("id", {
+        header: "",
+        cell: ({ getValue }) => {
+          return <a href={`/activities/${getValue()}`}>See Activity</a>;
+        },
+      }),
     ],
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
@@ -173,7 +183,6 @@ const StravaTable = ({
       .flatRows.map((row) => String(row.original.id));
     const deleteRows = await deleteMutation.mutateAsync({ rowIds });
 
-    console.log(deleteRows);
     if (deleteRows.message === "success") {
       setLoading(false);
       reloadData();

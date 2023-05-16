@@ -26,7 +26,6 @@ const SignInPage: NextPage = () => {
 export default SignInPage;
 
 export const getServerSideProps: GetServerSideProps = withSession((ctx) => {
-  console.log("SESSION", ctx.req.session);
   if (ctx.req.session) {
     return redirect(ctx, "/");
   }

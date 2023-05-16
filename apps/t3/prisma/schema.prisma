@@ -59,13 +59,17 @@ model User {
 }
 
 model Activity {
-    id            String  @id @unique
-    name          String
-    type          String
-    distance      Float
-    average_speed Float
-    start_date    String
-    private       Boolean
+    id                   String  @id @unique
+    name                 String
+    type                 String
+    distance             Float
+    average_speed        Float
+    start_date           String
+    private              Boolean
+    average_heartrate    Float
+    kudos_count          Float
+    achievement_count    Float
+    total_elevation_gain Float
 
     user   User   @relation(fields: [userId], references: [id])
     userId String @map(name: "user_id")

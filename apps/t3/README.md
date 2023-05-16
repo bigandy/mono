@@ -4,7 +4,7 @@
 
 ### Grabbing Data from Strava
 
-- [ ] Save all available data from Strava to the DB. In the short-term this can be 100 activities or similar
+- [x] Save all available data from Strava to the DB. In the short-term this can be 100 activities or similar
 - [ ] Have ability to regularly sync this data to the DB. Every 4 hours or so?
 - [ ] Have ability to press a button to sync the data
 
@@ -21,6 +21,21 @@
 #### Multiple Activities
 
 - [ ] do above but for multiple activities (e.g. bulk conversion from Run => Walk, for example)
+
+### Show Strava Data in UI
+
+#### Strava Table
+
+- [ ] Strava Table with customisable columns (show/hide)
+- [ ] pagination
+- [ ] column sorting
+- [ ] filtering e.g. by 'type'
+
+#### Strava "Feed"
+
+- [ ] show a feed of all the activities from the DB
+- [ ] name / hr / speed ... etc
+- [ ] filtering e.g. by 'type'
 
 ---
 

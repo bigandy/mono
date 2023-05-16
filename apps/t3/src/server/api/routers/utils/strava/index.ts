@@ -133,7 +133,7 @@ export const updateActivitytoWalk = async (
 };
 
 // Mostly correct I think.
-export interface StravaActivity {
+export interface IStravaActivity {
   id: number;
   resource_state: number;
   athlete: any;
@@ -191,4 +191,4 @@ interface PolylineMap {
   summary_polyline: string;
 }
 
-export type ActivityKeys = keyof StravaActivity;
+export type ActivityKeys = keyof IStravaActivity;

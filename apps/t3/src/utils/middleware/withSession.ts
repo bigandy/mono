@@ -8,14 +8,15 @@ export default function withSession(next: any = undefined) {
 
     const response = next ? await next(ctx) : {};
 
-    console.log(response, ctx.req.session);
-
     if (response.redirect) {
       return response;
     }
 
     return {
-      props: { session: ctx.req.session },
+      props: {
+        ...response.props,
+        session: ctx.req.session,
+      },
     };
   };
 }

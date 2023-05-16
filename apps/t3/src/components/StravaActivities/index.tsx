@@ -7,24 +7,26 @@ import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
 import {
-  type StravaActivity,
+  type IStravaActivity,
   type ActivityKeys,
 } from "~/server/api/routers/utils/strava";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
+  { id: "id", label: "ID" },
   { id: "start_date", label: "Date" },
   { id: "name", label: "Name" },
   { id: "distance", label: "Distance" },
   { id: "type", label: "Type" },
   { id: "average_speed", label: "Average Speed" },
   { id: "private", label: "Private" },
+  { id: "total_elevation_gain", label: "Elevation Gain" },
 ];
 
 const StravaActivities: React.FC = () => {
   const [isMetric, setIsMetric] = useState(false);
-  const [stravaActivities, setStravaActivities] = useState<
-    Partial<StravaActivity>[]
-  >([]);
+  const [stravaActivities, setStravaActivities] = useState<IStravaActivity[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
 
   const { data: sessionData } = useSession();
@@ -136,7 +138,7 @@ const StravaActivities: React.FC = () => {
       </div>
 
       <div className="container  mt-4 text-base text-black">
-        <Heading as="h2">Strava Data</Heading>
+        <Heading as="h2">Strava Data Table</Heading>
 
         {isLoading ? (
           <p>Loading...</p>

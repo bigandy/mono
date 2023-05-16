@@ -7,7 +7,7 @@ import {
 } from "~/server/api/trpc";
 
 import {
-  type StravaActivity,
+  type IStravaActivity,
   getAccessToken,
   // updateActivitytoWalk,
   fetchActivities,
@@ -59,13 +59,34 @@ export const stravaRouter = createTRPCRouter({
       });
       return { message: "success" };
     }),
+  getActivityFromDB: protectedProcedure
+    .input(z.object({ activityId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      const { activityId } = input;
+
+      if (activityId === "") {
+        // return TRPCClientError
+        return;
+      }
+
+      const activities = await ctx.prisma.activity.findMany({
+        where: {
+          user: {
+            id: user.id,
+          },
+          id: activityId,
+        },
+      });
+      return activities[0];
+    }),
   getActivitiesFromStrava: protectedProcedureWithAccount.mutation(
     async ({ ctx }) => {
       const { account, user } = ctx.session;
 
       if (account) {
         const accessToken = await getAccessToken(account, ctx);
-        const fetchedActivities: StravaActivity[] = await fetchActivities(
+        const fetchedActivities: IStravaActivity[] = await fetchActivities(
           accessToken,
           1,
           50
@@ -74,17 +95,29 @@ export const stravaRouter = createTRPCRouter({
         // loop through the activities;
         await fetchedActivities.reduce((promiseChain, activity) => {
           return promiseChain.then(async () => {
-            await ctx.prisma.activity.create({
-              data: {
-                id: activity.id.toString(),
-                name: activity.name,
-                distance: activity.distance,
-                type: activity.type,
-                average_speed: activity.average_speed,
-                start_date: activity.start_date,
-                private: activity.private,
-                user: { connect: { id: user.id } },
+            const data = {
+              id: activity.id.toString(),
+              name: activity.name,
+              distance: activity.distance,
+              type: activity.type,
+              average_speed: activity.average_speed,
+              start_date: activity.start_date,
+              private: activity.private,
+              average_heartrate: activity.has_heartrate
+                ? activity.average_heartrate
+                : 0,
+              kudos_count: activity.kudos_count,
+              achievement_count: activity.achievement_count,
+              total_elevation_gain: activity.total_elevation_gain,
+              user: { connect: { id: user.id } },
+            };
+
+            await ctx.prisma.activity.upsert({
+              where: {
+                id: data.id,
               },
+              create: data,
+              update: data,
             });
           });
         }, Promise.resolve());
