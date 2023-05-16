@@ -1,11 +1,4 @@
-import {
-  useMemo,
-  useEffect,
-  useRef,
-  type HTMLProps,
-  useState,
-  Fragment,
-} from "react";
+import { useMemo, useState, Fragment } from "react";
 import { format } from "date-fns";
 
 import {
@@ -19,147 +12,141 @@ import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
-import { StravaActivity } from "~/server/api/routers/utils/strava";
+import {
+  type StravaActivity,
+  type ActivityKeys,
+} from "~/server/api/routers/utils/strava";
 
 import { api } from "~/utils/api";
 
+// Components
 import Button from "~/components/Button";
+import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
 
 const METERS_TO_KMH = 3.6;
 const METERS_TO_MPH = 2.23694;
 
 const columnHelper = createColumnHelper<StravaActivity>();
 
-const columns = [
-  {
-    id: "select",
-    header: ({ table }: { table: any }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: table.getIsAllRowsSelected(),
-          indeterminate: table.getIsSomeRowsSelected(),
-          onChange: table.getToggleAllRowsSelectedHandler(),
-        }}
-      />
-    ),
-    cell: ({ row }: { row: any }) => (
-      <div className="px-1">
-        <IndeterminateCheckbox
-          {...{
-            checked: row.getIsSelected(),
-            disabled: !row.getCanSelect(),
-            indeterminate: row.getIsSomeSelected(),
-            onChange: row.getToggleSelectedHandler(),
-          }}
-        />
-      </div>
-    ),
-  },
-  columnHelper.accessor("id", {
-    header: "ID",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("start_date", {
-    header: "Date",
-    cell: (info) => {
-      return format(new Date(info.getValue()), "dd-MM-yyyy 'at' h:mm aaa");
-    },
-  }),
-  columnHelper.accessor("name", {
-    header: "Name",
-    cell: (info) => info.renderValue(),
-  }),
-  columnHelper.accessor("distance", {
-    header: ({ table }) => {
-      return (
-        <>
-          Distance
-          <br />
-          <small>({table?.options?.meta?.distanceUnit})</small>
-        </>
-      );
-    },
-    cell: ({ getValue, table }) => {
-      const distance = table.options.meta.isMetric
-        ? convertMetersToKilometers(getValue())
-        : convertMetersToMiles(getValue());
-      return `${distance} ${table.options.meta.distanceUnit}`;
-    },
-  }),
-  columnHelper.accessor("type", {
-    header: "Activity Type",
-  }),
-
-  columnHelper.accessor("average_speed", {
-    header: ({ table }) => {
-      return (
-        <>
-          Average Speed
-          <br />
-          <small>({table.options.meta.speedUnit})</small>
-        </>
-      );
-    },
-    cell: ({ table, getValue }) => {
-      const averageSpeed = table.options.meta.isMetric
-        ? getValue() * METERS_TO_KMH
-        : getValue() * METERS_TO_MPH;
-      console.log(getValue());
-      return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
-    },
-  }),
-  columnHelper.accessor("private", {
-    header: "Private?",
-    cell: ({ getValue }) => (getValue() ? "private" : ""),
-  }),
-];
-
-function IndeterminateCheckbox({
-  indeterminate,
-  className = "",
-  ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-  const ref = useRef<HTMLInputElement>(null!);
-
-  useEffect(() => {
-    if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate]);
-
-  return (
-    // @ts-ignore
-    <input
-      type="checkbox"
-      ref={ref}
-      className={className + " cursor-pointer"}
-      {...rest}
-    />
-  );
-}
-
 const StravaTable = ({
   data,
   isMetric,
   reloadData,
+  columnsToShow,
 }: {
   data: StravaActivity[] | [];
   reloadData: () => void;
   isMetric: boolean;
+  columnsToShow: ActivityKeys[];
 }) => {
   const speedUnit = isMetric ? "km/h" : "mph";
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  // const oneMutation = api.strava.saveOneActivity.useMutation();
-  // const manyMutation = api.strava.saveManyActivities.useMutation();
-  // const convertMutation = api.strava.convertOneActivity.useMutation();
-  const deleteMutation = api.strava.deleteAllDBActivities.useMutation();
+  const columns = useMemo(() => {
+    const listOfColumns = [
+      columnHelper.accessor("id", {
+        header: "ID",
+        id: "id",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("start_date", {
+        header: "Date",
+        id: "start_date",
+        cell: (info) => {
+          return format(new Date(info.getValue()), "dd-MM-yyyy 'at' h:mm aaa");
+        },
+      }),
+      columnHelper.accessor("name", {
+        header: "Name",
+        id: "name",
+        cell: (info) => info.renderValue(),
+      }),
+      columnHelper.accessor("distance", {
+        id: "distance",
+        header: ({ table }) => {
+          return (
+            <>
+              Distance
+              <br />
+              <small>({table?.options?.meta?.distanceUnit})</small>
+            </>
+          );
+        },
+        cell: ({ getValue, table }) => {
+          const distance = table.options.meta.isMetric
+            ? convertMetersToKilometers(getValue())
+            : convertMetersToMiles(getValue());
+          return `${distance} ${table.options.meta.distanceUnit}`;
+        },
+      }),
+      columnHelper.accessor("type", {
+        header: "Activity Type",
+        id: "type",
+      }),
+
+      columnHelper.accessor("average_speed", {
+        id: "average_speed",
+        header: ({ table }) => {
+          return (
+            <>
+              Average Speed
+              <br />
+              <small>({table.options.meta.speedUnit})</small>
+            </>
+          );
+        },
+        cell: ({ table, getValue }) => {
+          const averageSpeed = table.options.meta.isMetric
+            ? getValue() * METERS_TO_KMH
+            : getValue() * METERS_TO_MPH;
+          return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
+        },
+      }),
+      columnHelper.accessor("private", {
+        id: "private",
+        header: "Private?",
+        cell: ({ getValue }) => (getValue() ? "private" : ""),
+      }),
+    ];
+
+    return listOfColumns.filter((column) => {
+      return columnsToShow.includes(column.id as ActivityKeys);
+    });
+  }, [columnsToShow]);
+
+  const deleteMutation = api.strava.deleteDBActivities.useMutation();
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [
+      {
+        id: "select",
+        header: ({ table }: { table: any }) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }: { row: any }) => (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(),
+                disabled: !row.getCanSelect(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+              }}
+            />
+          </div>
+        ),
+      },
+      ...columns,
+    ],
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -174,86 +161,30 @@ const StravaTable = ({
   });
 
   const selectedActivities = useMemo(() => {
-    // console.log("changing");
-    const rowModal = table.getSelectedRowModel();
-    // console.log(rowModal.flatRows.map((row) => row.original.id));
-    return rowModal.flatRows.map((row) => row.original.id);
+    return table.getSelectedRowModel().flatRows.map((row) => row.original.id);
   }, [rowSelection]);
 
   const activitiesCount = selectedActivities.length;
 
-  // const handleSaveOne = async () => {
-  //   // 1. what is the id of the selected row?
-  //   const activityId = selectedActivities[0];
-
-  //   // get the activity data
-  //   const selectedRows = table.getSelectedRowModel();
-  //   const row = selectedRows.rows[0]?.original;
-
-  //   console.log({ row });
-
-  //   // 2. fire off the saveActivity mutation
-
-  //   if (row && activityId) {
-  //     const mutation = await oneMutation.mutateAsync({
-  //       activityId: activityId?.toString(),
-  //       name: row.name,
-  //       distance: row.distance,
-  //       average_speed: row.average_speed,
-  //       type: row.type,
-  //       start_date: row.start_date,
-  //       private: row.private,
-
-  //       //   name: "derp",
-  //       //   distance: 1000,
-  //       //   averageSpeed: 5,
-  //     });
-  //     // // finally: reset the selection
-  //     if (mutation.message === "success") {
-  //       table.resetRowSelection();
-  //     }
-  //     // console.log({ mutation });
-  //   }
-  // };
-
-  // const handleConvertOne = async () => {
-  //   const activityId = selectedActivities[0];
-  //   const activity = table
-  //     .getSelectedRowModel()
-  //     .flatRows.find((row) => row.original.id === activityId);
-
-  //   if (!activity || activity.original.type !== "Run") {
-  //     table.resetRowSelection();
-  //   } else {
-  //     const mutation = await convertMutation.mutateAsync({
-  //       activityId: activity.original.id.toString(),
-  //       activityName: activity.original.name,
-  //     });
-
-  //     if (mutation?.message === "success") {
-  //       reloadData();
-  //       table.resetRowSelection();
-  //     }
-  //   }
-  //   // console.log({ original: activity.original });
-  //   return;
-  // };
-
-  const handleDeleteAll = async () => {
+  const handleDeleteRows = async () => {
     setLoading(true);
-    const deleteAll = await deleteMutation.mutateAsync();
-    if (deleteAll.message === "success") {
+    const rowIds = table
+      .getSelectedRowModel()
+      .flatRows.map((row) => String(row.original.id));
+    const deleteRows = await deleteMutation.mutateAsync({ rowIds });
+
+    console.log(deleteRows);
+    if (deleteRows.message === "success") {
       setLoading(false);
+      reloadData();
       table.resetRowSelection();
     }
   };
 
-  // console.log(mutation.isSuccess);
-
   return (
     <Fragment>
       <table>
-        <thead>
+        <thead className={"sticky top-[64px] bg-white shadow-md"}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -282,9 +213,10 @@ const StravaTable = ({
         </tbody>
       </table>
       <StravaTableActionBar
+        loading={loading}
         onReset={() => table.resetRowSelection()}
         // onSaveOne={handleSaveOne}
-        onDeleteAll={handleDeleteAll}
+        onDeleteRows={handleDeleteRows}
         count={activitiesCount}
       />
     </Fragment>
@@ -301,12 +233,12 @@ const StravaTable = ({
 const StravaTableActionBar = ({
   count,
   onReset,
-  onDeleteAll,
+  onDeleteRows,
   loading,
 }: {
   count: number;
   onReset: () => void;
-  onDeleteAll: () => void;
+  onDeleteRows: () => void;
   loading: boolean;
 }) => {
   if (count === 0) {
@@ -320,12 +252,8 @@ const StravaTableActionBar = ({
         ) : (
           <Fragment>
             <p>You have selected {count} activities</p>
-            {/* {count === 1 && <Button onClick={onSaveOne}>Save ONE to DB</Button>} */}
-            {/* {count === 1 && (
-          <Button onClick={onConvertOne}>Convert ONE in Strava</Button>
-        )} */}
-            {count > 1 && <Button onClick={onDeleteAll}>Delete All</Button>}
-            <Button onClick={onReset}>Reset</Button>
+            <Button onClick={onDeleteRows}>Delete {count} activities</Button>
+            <Button onClick={onReset}>Reset Selection</Button>
           </Fragment>
         )}
       </div>

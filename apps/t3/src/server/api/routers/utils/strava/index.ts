@@ -190,3 +190,5 @@ interface PolylineMap {
   polyline: string;
   summary_polyline: string;
 }
+
+export type ActivityKeys = keyof StravaActivity;

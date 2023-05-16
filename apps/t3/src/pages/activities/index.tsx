@@ -5,6 +5,7 @@ import withSession from "~/utils/middleware/withSession";
 
 import StravaActivitiesTable from "~/components/StravaActivities";
 import BasicLayout from "~/layouts/BasicLayout";
+import { redirect } from "~/utils/redirect";
 
 const ActivitiesPage: NextPage = () => {
   return (
@@ -18,7 +19,10 @@ const ActivitiesPage: NextPage = () => {
 
 export default ActivitiesPage;
 
-export const getServerSideProps: GetServerSideProps = withSession(() => {
+export const getServerSideProps: GetServerSideProps = withSession((ctx) => {
+  if (!ctx.req.session) {
+    return redirect(ctx, "/signin");
+  }
   return {
     props: {},
   };
