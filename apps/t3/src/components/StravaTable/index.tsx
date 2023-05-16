@@ -56,7 +56,7 @@ const columns = [
     ),
   },
   columnHelper.accessor("id", {
-    header: "id",
+    header: "ID",
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("start_date", {
@@ -104,6 +104,7 @@ const columns = [
       const averageSpeed = table.options.meta.isMetric
         ? getValue() * METERS_TO_KMH
         : getValue() * METERS_TO_MPH;
+      console.log(getValue());
       return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
     },
   }),
@@ -149,10 +150,12 @@ const StravaTable = ({
   const speedUnit = isMetric ? "km/h" : "mph";
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
+  const [loading, setLoading] = useState({});
 
-  const oneMutation = api.strava.saveOneActivity.useMutation();
-  const manyMutation = api.strava.saveManyActivities.useMutation();
-  const convertMutation = api.strava.convertOneActivity.useMutation();
+  // const oneMutation = api.strava.saveOneActivity.useMutation();
+  // const manyMutation = api.strava.saveManyActivities.useMutation();
+  // const convertMutation = api.strava.convertOneActivity.useMutation();
+  const deleteMutation = api.strava.deleteAllDBActivities.useMutation();
 
   const table = useReactTable({
     data,
@@ -179,56 +182,70 @@ const StravaTable = ({
 
   const activitiesCount = selectedActivities.length;
 
-  const handleSaveOne = async () => {
-    // 1. what is the id of the selected row?
-    const activityId = selectedActivities[0];
-    // 2. fire off the saveActivity mutation
+  // const handleSaveOne = async () => {
+  //   // 1. what is the id of the selected row?
+  //   const activityId = selectedActivities[0];
 
-    const thing = await oneMutation.mutateAsync({
-      activityId,
-    });
-    // finally: reset the selection
-    if (thing.message === "success") {
+  //   // get the activity data
+  //   const selectedRows = table.getSelectedRowModel();
+  //   const row = selectedRows.rows[0]?.original;
+
+  //   console.log({ row });
+
+  //   // 2. fire off the saveActivity mutation
+
+  //   if (row && activityId) {
+  //     const mutation = await oneMutation.mutateAsync({
+  //       activityId: activityId?.toString(),
+  //       name: row.name,
+  //       distance: row.distance,
+  //       average_speed: row.average_speed,
+  //       type: row.type,
+  //       start_date: row.start_date,
+  //       private: row.private,
+
+  //       //   name: "derp",
+  //       //   distance: 1000,
+  //       //   averageSpeed: 5,
+  //     });
+  //     // // finally: reset the selection
+  //     if (mutation.message === "success") {
+  //       table.resetRowSelection();
+  //     }
+  //     // console.log({ mutation });
+  //   }
+  // };
+
+  // const handleConvertOne = async () => {
+  //   const activityId = selectedActivities[0];
+  //   const activity = table
+  //     .getSelectedRowModel()
+  //     .flatRows.find((row) => row.original.id === activityId);
+
+  //   if (!activity || activity.original.type !== "Run") {
+  //     table.resetRowSelection();
+  //   } else {
+  //     const mutation = await convertMutation.mutateAsync({
+  //       activityId: activity.original.id.toString(),
+  //       activityName: activity.original.name,
+  //     });
+
+  //     if (mutation?.message === "success") {
+  //       reloadData();
+  //       table.resetRowSelection();
+  //     }
+  //   }
+  //   // console.log({ original: activity.original });
+  //   return;
+  // };
+
+  const handleDeleteAll = async () => {
+    setLoading(true);
+    const deleteAll = await deleteMutation.mutateAsync();
+    if (deleteAll.message === "success") {
+      setLoading(false);
       table.resetRowSelection();
     }
-    // console.log({ thing });
-  };
-
-  const handleConvertOne = async () => {
-    const activityId = selectedActivities[0];
-    const activity = table
-      .getSelectedRowModel()
-      .flatRows.find((row) => row.original.id === activityId);
-
-    if (!activity || activity.original.type !== "Run") {
-      table.resetRowSelection();
-    } else {
-      const mutation = await convertMutation.mutateAsync({
-        activityId: activity.original.id.toString(),
-        activityName: activity.original.name,
-      });
-
-      if (mutation?.message === "success") {
-        reloadData();
-        table.resetRowSelection();
-      }
-    }
-    // console.log({ original: activity.original });
-    return;
-  };
-
-  const handleSaveAll = async () => {
-    // // 1. what is the id of the selected row?
-    // const activityId = selectedActivities;
-    // // 2. fire off the saveActivity mutation
-    const thing = await manyMutation.mutateAsync({
-      activityIds: selectedActivities,
-    });
-    // // finally: reset the selection
-    if (thing.message === "success") {
-      table.resetRowSelection();
-    }
-    // console.log({ thing });
   };
 
   // console.log(mutation.isSuccess);
@@ -266,10 +283,9 @@ const StravaTable = ({
       </table>
       <StravaTableActionBar
         onReset={() => table.resetRowSelection()}
-        onSaveOne={handleSaveOne}
-        onSaveAll={handleSaveAll}
+        // onSaveOne={handleSaveOne}
+        onDeleteAll={handleDeleteAll}
         count={activitiesCount}
-        onConvertOne={handleConvertOne}
       />
     </Fragment>
   );
@@ -285,15 +301,13 @@ const StravaTable = ({
 const StravaTableActionBar = ({
   count,
   onReset,
-  onSaveOne,
-  onSaveAll,
-  onConvertOne,
+  onDeleteAll,
+  loading,
 }: {
   count: number;
   onReset: () => void;
-  onSaveOne: () => void;
-  onSaveAll: () => void;
-  onConvertOne: () => void;
+  onDeleteAll: () => void;
+  loading: boolean;
 }) => {
   if (count === 0) {
     return null;
@@ -301,13 +315,19 @@ const StravaTableActionBar = ({
   return (
     <div className="fixed bottom-0 left-0   w-screen border bg-white p-4">
       <div className="container  mx-auto  flex max-w-7xl items-center gap-4 px-2 sm:px-6 lg:px-8">
-        <p>You have selected {count} activities</p>
-        {count === 1 && <Button onClick={onSaveOne}>Save ONE to DB</Button>}
-        {count === 1 && (
+        {loading ? (
+          <p>Loading</p>
+        ) : (
+          <Fragment>
+            <p>You have selected {count} activities</p>
+            {/* {count === 1 && <Button onClick={onSaveOne}>Save ONE to DB</Button>} */}
+            {/* {count === 1 && (
           <Button onClick={onConvertOne}>Convert ONE in Strava</Button>
+        )} */}
+            {count > 1 && <Button onClick={onDeleteAll}>Delete All</Button>}
+            <Button onClick={onReset}>Reset</Button>
+          </Fragment>
         )}
-        {count > 1 && <Button onClick={onSaveAll}>Save ALL to DB</Button>}
-        <Button onClick={onReset}>Reset</Button>
       </div>
     </div>
   );

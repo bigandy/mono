@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 
 import { api } from "~/utils/api";
@@ -9,21 +9,39 @@ import StravaTable from "~/components/StravaTable";
 
 const StravaActivities: React.FC = () => {
   const [isMetric, setIsMetric] = useState(false);
+  const [stravaActivities, setStravaActivities] = useState([]);
 
   const { data: sessionData } = useSession();
   const [page, setPage] = useState(1);
 
   const {
-    data: getActivities,
+    data: dbActivities,
     isLoading,
     refetch,
-  } = api.strava.getActivities.useQuery(
+  } = api.strava.getActivitiesFromDB.useQuery(
     { page: page, activities_count: 10 },
     { enabled: sessionData?.user !== undefined }
   );
 
+  const getActivitiesMutation =
+    api.strava.getActivitiesFromStrava.useMutation();
+
   const handleNextPage = () => setPage((p) => p + 1);
   const handlePreviousPage = () => setPage((p) => p - 1);
+
+  useEffect(() => {
+    if (dbActivities && dbActivities.length > 0) {
+      setStravaActivities(dbActivities);
+    }
+  }, [dbActivities, page]);
+
+  const handleGetStravaActivities = async () => {
+    getActivitiesMutation;
+
+    const mutation = await getActivitiesMutation.mutateAsync({});
+
+    console.log(mutation);
+  };
 
   return (
     <div>
@@ -58,10 +76,18 @@ const StravaActivities: React.FC = () => {
           <p>Loading...</p>
         ) : (
           <StravaTable
-            data={getActivities ? getActivities : []}
+            data={stravaActivities}
             isMetric={isMetric}
             reloadData={refetch}
           />
+        )}
+
+        {stravaActivities.length === 0 && (
+          <div className="mt-4">
+            <Button primary big onClick={handleGetStravaActivities}>
+              Get Strava Activities
+            </Button>
+          </div>
         )}
 
         <Button
