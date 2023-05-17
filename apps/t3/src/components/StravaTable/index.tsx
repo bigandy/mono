@@ -13,8 +13,8 @@ import {
   convertMetersToMiles,
 } from "~/utils/conversion";
 import {
-  type IStravaActivity,
   type ActivityKeys,
+  type Activity,
 } from "~/server/api/routers/utils/strava";
 
 import { api } from "~/utils/api";
@@ -26,7 +26,7 @@ import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
 const METERS_TO_KMH = 3.6;
 const METERS_TO_MPH = 2.23694;
 
-const columnHelper = createColumnHelper<IStravaActivity>();
+const columnHelper = createColumnHelper<Activity>();
 
 const StravaTable = ({
   data,
@@ -34,7 +34,7 @@ const StravaTable = ({
   reloadData,
   columnsToShow,
 }: {
-  data: IStravaActivity[] | [];
+  data: Activity[] | [];
   reloadData: () => void;
   isMetric: boolean;
   columnsToShow: ActivityKeys[];
@@ -75,10 +75,10 @@ const StravaTable = ({
           );
         },
         cell: ({ getValue, table }) => {
-          const distance = table.options.meta.isMetric
+          const distance = table.options.meta?.isMetric
             ? convertMetersToKilometers(getValue())
             : convertMetersToMiles(getValue());
-          return `${distance} ${table.options.meta.distanceUnit}`;
+          return `${distance} ${table.options.meta?.distanceUnit}`;
         },
       }),
       columnHelper.accessor("type", {
@@ -97,21 +97,22 @@ const StravaTable = ({
             <>
               Average Speed
               <br />
-              <small>({table.options.meta.speedUnit})</small>
+              <small>({table.options?.meta?.speedUnit})</small>
             </>
           );
         },
         cell: ({ table, getValue }) => {
-          const averageSpeed = table.options.meta.isMetric
+          const averageSpeed = table.options.meta?.isMetric
             ? getValue() * METERS_TO_KMH
             : getValue() * METERS_TO_MPH;
-          return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
+          return `${averageSpeed.toFixed(2)} ${table.options.meta?.speedUnit}`;
         },
       }),
       columnHelper.accessor("private", {
         id: "private",
         header: "Private?",
-        cell: ({ getValue }) => (getValue() ? "private" : ""),
+        cell: ({ getValue }: { getValue: () => any }) =>
+          getValue() ? "private" : "",
       }),
     ];
 
@@ -127,7 +128,7 @@ const StravaTable = ({
     columns: [
       {
         id: "select",
-        header: ({ table }: { table: any }) => (
+        header: ({ table }) => (
           <IndeterminateCheckbox
             {...{
               checked: table.getIsAllRowsSelected(),
@@ -136,7 +137,7 @@ const StravaTable = ({
             }}
           />
         ),
-        cell: ({ row }: { row: any }) => (
+        cell: ({ row }) => (
           <div className="px-1">
             <IndeterminateCheckbox
               {...{
@@ -152,7 +153,7 @@ const StravaTable = ({
       ...columns,
       columnHelper.accessor("id", {
         header: "",
-        cell: ({ getValue }) => {
+        cell: ({ getValue }: { getValue: () => any }) => {
           return <a href={`/activities/${getValue()}`}>See Activity</a>;
         },
       }),
@@ -224,7 +225,6 @@ const StravaTable = ({
       <StravaTableActionBar
         loading={loading}
         onReset={() => table.resetRowSelection()}
-        // onSaveOne={handleSaveOne}
         onDeleteRows={handleDeleteRows}
         count={activitiesCount}
       />

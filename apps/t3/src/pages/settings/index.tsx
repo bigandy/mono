@@ -33,6 +33,7 @@ const SettingsPage: NextPage = () => {
 
 export default SettingsPage;
 
+// @ts-expect-error TODO: Need to fix typing of ctx
 export const getServerSideProps: GetServerSideProps = withSession((ctx) => {
   if (!ctx.req.session) {
     return redirect(ctx, "/signin");

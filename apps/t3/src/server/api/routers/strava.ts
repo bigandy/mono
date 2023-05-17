@@ -11,6 +11,7 @@ import {
   getAccessToken,
   // updateActivitytoWalk,
   fetchActivities,
+  fetchOneActivity,
 } from "./utils/strava";
 
 // const stravaActivityZod = z.object({
@@ -80,6 +81,23 @@ export const stravaRouter = createTRPCRouter({
       });
       return activities[0];
     }),
+  getOneActivityFromStrava: protectedProcedureWithAccount
+    .input(z.object({ activityId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { account } = ctx.session;
+      if (account) {
+        const accessToken = await getAccessToken(account, ctx);
+
+        const fetchedActivity: IStravaActivity = await fetchOneActivity(
+          accessToken,
+          input.activityId
+        );
+
+        return fetchedActivity;
+      } else {
+        return null;
+      }
+    }),
   getActivitiesFromStrava: protectedProcedureWithAccount.mutation(
     async ({ ctx }) => {
       const { account, user } = ctx.session;
@@ -111,7 +129,7 @@ export const stravaRouter = createTRPCRouter({
               total_elevation_gain: activity.total_elevation_gain,
               user: { connect: { id: user.id } },
             };
-
+            // add to DB
             await ctx.prisma.activity.upsert({
               where: {
                 id: data.id,

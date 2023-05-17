@@ -7,7 +7,7 @@ import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
 import {
-  type IStravaActivity,
+  type Activity,
   type ActivityKeys,
 } from "~/server/api/routers/utils/strava";
 
@@ -24,9 +24,7 @@ const defaultColumns: { id: ActivityKeys; label: string }[] = [
 
 const StravaActivities: React.FC = () => {
   const [isMetric, setIsMetric] = useState(false);
-  const [stravaActivities, setStravaActivities] = useState<IStravaActivity[]>(
-    []
-  );
+  const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
 
   const { data: sessionData } = useSession();

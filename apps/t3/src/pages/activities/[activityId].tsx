@@ -11,16 +11,17 @@ import StravaActivity from "~/components/StravaActivity";
 
 const ActivityPage: NextPage = () => {
   const router = useRouter();
-  const { activityId } = router.query;
-  const { data: activity, loading } = api.strava.getActivityFromDB.useQuery({
-    activityId,
-  });
+  const activityId = router.query.activityId as string;
 
-  console.log({ activity });
+  const { data: activity, isLoading } =
+    api.strava.getOneActivityFromStrava.useQuery({
+      activityId: activityId,
+    });
+
   return (
     <>
       <BasicLayout title={activity?.name ?? ""}>
-        {loading && <p>Loading...</p>}
+        {isLoading && <p>Loading...</p>}
         {activity && <StravaActivity activity={activity} />}
       </BasicLayout>
     </>
@@ -29,6 +30,7 @@ const ActivityPage: NextPage = () => {
 
 export default ActivityPage;
 
+// @ts-expect-error TODO: Need to fix typing of ctx
 export const getServerSideProps: GetServerSideProps = withSession((ctx) => {
   if (!ctx.req.session) {
     return redirect(ctx, "/signin");
