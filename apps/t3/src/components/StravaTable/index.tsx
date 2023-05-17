@@ -12,6 +12,8 @@ import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
+import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
+
 import {
   type ActivityKeys,
   type Activity,
@@ -22,9 +24,6 @@ import { api } from "~/utils/api";
 // Components
 import Button from "~/components/Button";
 import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
-
-const METERS_TO_KMH = 3.6;
-const METERS_TO_MPH = 2.23694;
 
 const columnHelper = createColumnHelper<Activity>();
 

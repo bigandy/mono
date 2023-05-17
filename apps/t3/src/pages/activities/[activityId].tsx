@@ -13,15 +13,15 @@ const ActivityPage: NextPage = () => {
   const router = useRouter();
   const activityId = router.query.activityId as string;
 
-  const { data: activity, isLoading } =
-    api.strava.getOneActivityFromStrava.useQuery({
-      activityId: activityId,
-    });
+  const { data: activity, isLoading } = api.strava.getActivityFromDB.useQuery({
+    activityId: activityId,
+  });
 
   return (
     <>
       <BasicLayout title={activity?.name ?? ""}>
         {isLoading && <p>Loading...</p>}
+        <a href="/activities">&larr; back to Activities</a>
         {activity && <StravaActivity activity={activity} />}
       </BasicLayout>
     </>

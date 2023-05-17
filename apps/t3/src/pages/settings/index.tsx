@@ -15,7 +15,6 @@ const SettingsPage: NextPage = () => {
   const syncActivitiesFromStrava = async () => {
     setLoading(true);
     const act = await getActivities.mutateAsync();
-    console.log(act);
     if (act.message === "success") {
       setLoading(false);
     }

@@ -28,7 +28,7 @@ const StravaActivities: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const { data: sessionData } = useSession();
-  const [page, setPage] = useState(1);
+  const page = 1;
   const [columnsToShow, setColumnsToShow] = useState<ActivityKeys[]>(
     defaultColumns.map((col) => col.id)
   );
