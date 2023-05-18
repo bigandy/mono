@@ -11,9 +11,10 @@ import {
   // updateActivitytoWalk,
   fetchActivities,
   fetchOneActivity,
+  updateOneActivity,
 } from "./utils/strava";
 
-import { type IStravaActivity } from "~/types";
+import { type IStravaActivity, activities } from "~/types";
 
 // const stravaActivityZod = z.object({
 //   activityId: z.string(),
@@ -43,24 +44,35 @@ export const stravaRouter = createTRPCRouter({
       });
       return activities;
     }),
-  updateOneActivityinDB: protectedProcedure
+  updateOneActivity: protectedProcedureWithAccount
     .input(
       z.object({
         id: z.string(),
         name: z.string(),
-        type: z.string(),
+        type: z.enum(activities),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.activity.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          name: input.name,
-          type: input.type,
-        },
-      });
+      const { account } = ctx.session;
+
+      if (account) {
+        const accessToken = await getAccessToken(account, ctx);
+        await Promise.all([
+          updateOneActivity(accessToken, input.id, {
+            name: input.name,
+            type: input.type,
+          }),
+          ctx.prisma.activity.update({
+            where: {
+              id: input.id,
+            },
+            data: {
+              name: input.name,
+              type: input.type,
+            },
+          }),
+        ]);
+      }
     }),
   deleteDBActivities: protectedProcedure
     .input(z.object({ rowIds: z.array(z.string()) }))

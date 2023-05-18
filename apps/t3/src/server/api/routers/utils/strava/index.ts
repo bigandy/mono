@@ -1,4 +1,5 @@
 import stravaApi from "strava-v3";
+import { ActivityType } from "~/types";
 
 /**
  * A method to get a Strava Access Token
@@ -122,6 +123,44 @@ export const fetchOneActivity = async (
       return Error("invalid access token, need another");
     }
     return Error("error in fetch one activity");
+  }
+};
+
+/**
+ * Update one activity in Strava. Currently only name and type are allowed.
+ * @param accessToken
+ * @param activityId
+ * @param data
+ * @returns
+ */
+export const updateOneActivity = async (
+  accessToken: string,
+  activityId: string,
+  data: {
+    name: string;
+    type: ActivityType;
+  }
+) => {
+  try {
+    const stravaAPI = getStravaClient(accessToken);
+
+    var args = {
+      id: activityId,
+      name: data.name,
+      sport_type: data.type,
+      type: data.type,
+    };
+
+    await stravaAPI.activities.update(args);
+
+    return { message: "success" };
+  } catch (error) {
+    console.log(error);
+    // @ts-ignore
+    if (error?.error?.errors[0]?.code === "invalid") {
+      return Error("invalid access token, need another");
+    }
+    return Error("error in fetch activities");
   }
 };
 

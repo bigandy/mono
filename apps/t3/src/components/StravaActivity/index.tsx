@@ -54,15 +54,21 @@ type EditableViewProps = { activity: Activity };
  */
 const EditableView = ({ activity }: EditableViewProps) => {
   const utils = api.useContext();
-  const updateMutation = api.strava.updateOneActivityinDB.useMutation({
+  const updateMutation = api.strava.updateOneActivity.useMutation({
     onSuccess: () => {
       // utils.strava.getActivitiesFromDB.invalidate(); // Don't currently need to do as this is refetched when go to /activites page.
       utils.strava.getActivityFromDB.invalidate({ activityId: activity.id });
       toast.success("Successfully updated activity");
     },
+    onError: () => {
+      toast.error("Error while editing activity");
+    },
   });
 
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<{
+    name: string;
+    type: ActivityType;
+  }>({
     name: activity.name,
     type: activity.type,
   });
