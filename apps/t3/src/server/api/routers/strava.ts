@@ -14,7 +14,7 @@ import {
   updateOneActivity,
 } from "./utils/strava";
 
-import { type IStravaActivity, activities } from "~/types";
+import { type IStravaActivity, activities, ActivityType } from "~/types";
 
 // const stravaActivityZod = z.object({
 //   activityId: z.string(),
@@ -149,7 +149,7 @@ export const stravaRouter = createTRPCRouter({
               id: activity.id.toString(),
               name: activity.name,
               distance: activity.distance,
-              type: activity.type,
+              type: activity.type as ActivityType,
               average_speed: activity.average_speed,
               start_date: activity.start_date,
               private: activity.private,

@@ -70,7 +70,7 @@ const EditableView = ({ activity }: EditableViewProps) => {
     type: ActivityType;
   }>({
     name: activity.name,
-    type: activity.type,
+    type: activity.type as ActivityType,
   });
 
   const handleChange = (
@@ -79,7 +79,7 @@ const EditableView = ({ activity }: EditableViewProps) => {
   ) => {
     setFormState((prevState) => {
       const newState = { ...prevState };
-      newState[inputId] = e.target.value;
+      newState[inputId] = e.target.value as ActivityType;
 
       return newState;
     });

@@ -55,10 +55,19 @@ model User {
     Activity      Activity[]
 }
 
+enum ActivityType {
+    Run
+    TrailRun
+    Walk
+    Hike
+    Ride
+    VirtualRide
+}
+
 model Activity {
-    id                   String  @id @unique
+    id                   String       @id @unique
     name                 String
-    type                 String
+    type                 ActivityType
     distance             Float
     average_speed        Float
     start_date           String
