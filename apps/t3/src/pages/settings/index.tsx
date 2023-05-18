@@ -22,7 +22,7 @@ const SettingsPage: NextPage = () => {
 
   return (
     <>
-      <BasicLayout title="Activities">
+      <BasicLayout title="Settings">
         <Button
           onClick={syncActivitiesFromStrava}
           big
