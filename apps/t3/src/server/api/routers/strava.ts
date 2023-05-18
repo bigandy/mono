@@ -7,12 +7,13 @@ import {
 } from "~/server/api/trpc";
 
 import {
-  type IStravaActivity,
   getAccessToken,
   // updateActivitytoWalk,
   fetchActivities,
   fetchOneActivity,
 } from "./utils/strava";
+
+import { type IStravaActivity } from "~/types";
 
 // const stravaActivityZod = z.object({
 //   activityId: z.string(),
@@ -41,6 +42,25 @@ export const stravaRouter = createTRPCRouter({
         },
       });
       return activities;
+    }),
+  updateOneActivityinDB: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.activity.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          type: input.type,
+        },
+      });
     }),
   deleteDBActivities: protectedProcedure
     .input(z.object({ rowIds: z.array(z.string()) }))

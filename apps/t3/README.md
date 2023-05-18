@@ -6,14 +6,17 @@
 
 - [x] Save all available data from Strava to the DB. In the short-term this can be 100 activities or similar
 - [ ] Have ability to regularly sync this data to the DB. Every 4 hours or so?
-- [ ] Have ability to press a button to sync the data
+- [x] Have ability to press a button to sync the data
 
 ### Update Strava activities from this app
 
 #### Single Activity
 
-- [ ] edit one activity in Strava (editable fields should only be name/comments/type)
-- [ ] editing this one activity should also update the local DB (should it be DB first or Strava API first?)
+- [x] create page for viewing single activity
+- [x] editing state where inputs are editable, with save button
+- [x] edit one activity (editable fields should only be name/type at this stage)
+- [ ] editing this activity updates the activity on Strava
+- [ ] editing this one activity should also update the local DB
 - [ ] optimistic update so the UI feels super quick
 - [ ] on success show success toast
 - [ ] if error, show error toast, and roll back the UI change
@@ -33,9 +36,8 @@
 
 #### Strava "Feed"
 
-- [ ] show a feed of all the activities from the DB
-- [ ] name / hr / speed ... etc
-- [ ] filtering e.g. by 'type'
+- [x] show a feed of all the activities from the DB
+- [x] name / hr / speed ... etc
 
 ---
 

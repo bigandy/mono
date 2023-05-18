@@ -13,25 +13,27 @@ import { api } from "~/utils/api";
 import StravaActivity from "~/components/StravaActivity";
 import Button from "~/components/Button";
 
-import { type Activity } from "~/server/api/routers/utils/strava";
+import { type Activity } from "~/types";
 
 const Home: NextPage = () => {
+  const utils = api.useContext();
   const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
 
   const { data: sessionData } = useSession();
 
-  const {
-    data: dbActivities,
-    isLoading,
-    refetch,
-  } = api.strava.getActivitiesFromDB.useQuery(
-    { page: 1, activities_count: 10 },
-    { enabled: sessionData?.user !== undefined }
-  );
+  const { data: dbActivities, isLoading } =
+    api.strava.getActivitiesFromDB.useQuery(
+      { page: 1, activities_count: 10 },
+      { enabled: sessionData?.user !== undefined }
+    );
 
-  const getActivitiesMutation =
-    api.strava.getActivitiesFromStrava.useMutation();
+  const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({
+    onSuccess: () => {
+      utils.strava.getActivitiesFromDB.invalidate();
+      setLoading(false);
+    },
+  });
 
   useEffect(() => {
     if (dbActivities && dbActivities.length > 0) {
@@ -46,8 +48,6 @@ const Home: NextPage = () => {
     const mutation = await getActivitiesMutation.mutateAsync();
 
     if (mutation.message === "success") {
-      refetch();
-      setLoading(false);
     }
 
     // console.log("handleGetStravaActivities", mutation);

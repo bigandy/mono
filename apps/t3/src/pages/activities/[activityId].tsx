@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { type NextPage } from "next";
 import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -10,19 +11,32 @@ import { api } from "~/utils/api";
 import StravaActivity from "~/components/StravaActivity";
 
 const ActivityPage: NextPage = () => {
+  const [editable, setEditable] = useState(false);
   const router = useRouter();
   const activityId = router.query.activityId as string;
 
   const { data: activity, isLoading } = api.strava.getActivityFromDB.useQuery({
-    activityId: activityId,
+    activityId,
   });
 
   return (
     <>
-      <BasicLayout title={activity?.name ?? ""}>
+      <BasicLayout title={""}>
+        <div>
+          <a href="/activities">&larr; back to Activities</a>
+        </div>
+        <div>
+          <label htmlFor="editable">Edit?</label>
+          <input
+            type="checkbox"
+            checked={editable}
+            onChange={() => setEditable((e) => !e)}
+            id="editable"
+          />
+        </div>
+
         {isLoading && <p>Loading...</p>}
-        <a href="/activities">&larr; back to Activities</a>
-        {activity && <StravaActivity activity={activity} />}
+        {activity && <StravaActivity activity={activity} editable={editable} />}
       </BasicLayout>
     </>
   );
@@ -40,3 +54,7 @@ export const getServerSideProps: GetServerSideProps = withSession((ctx) => {
     props: {},
   };
 });
+
+// IDEAS:
+// - get DB stuff, then async get more info from the Strava API for this activity.
+// - editable name, type

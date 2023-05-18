@@ -14,10 +14,7 @@ import {
 } from "~/utils/conversion";
 import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
 
-import {
-  type ActivityKeys,
-  type Activity,
-} from "~/server/api/routers/utils/strava";
+import { type ActivityKeys, type Activity } from "~/types";
 
 import { api } from "~/utils/api";
 
@@ -30,14 +27,13 @@ const columnHelper = createColumnHelper<Activity>();
 const StravaTable = ({
   data,
   isMetric,
-  reloadData,
   columnsToShow,
 }: {
   data: Activity[] | [];
-  reloadData: () => void;
   isMetric: boolean;
   columnsToShow: ActivityKeys[];
 }) => {
+  const utils = api.useContext();
   const speedUnit = isMetric ? "km/h" : "mph";
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
@@ -120,7 +116,13 @@ const StravaTable = ({
     });
   }, [columnsToShow]);
 
-  const deleteMutation = api.strava.deleteDBActivities.useMutation();
+  const deleteMutation = api.strava.deleteDBActivities.useMutation({
+    onSuccess: () => {
+      setLoading(false);
+      utils.strava.getActivitiesFromDB.invalidate();
+      table.resetRowSelection();
+    },
+  });
 
   const table = useReactTable({
     data,
@@ -182,12 +184,6 @@ const StravaTable = ({
       .getSelectedRowModel()
       .flatRows.map((row) => String(row.original.id));
     const deleteRows = await deleteMutation.mutateAsync({ rowIds });
-
-    if (deleteRows.message === "success") {
-      setLoading(false);
-      reloadData();
-      table.resetRowSelection();
-    }
   };
 
   return (

@@ -3,6 +3,7 @@ interface Props extends React.ComponentProps<"button"> {
   primary?: boolean;
   secondary?: boolean;
   big?: boolean;
+  loading?: boolean;
 }
 
 const Button = ({
@@ -12,6 +13,7 @@ const Button = ({
   onClick,
   children,
   className,
+  loading = false,
   ...props
 }: Props) => {
   let classes = "bg-white hover:bg-white/80 text-black px-5 py-1";
@@ -25,9 +27,10 @@ const Button = ({
     <button
       className={`rounded-full border    ${classes} font-semibold  no-underline transition  ${className}`}
       onClick={onClick}
+      disabled={props.disabled || loading}
       {...props}
     >
-      {children}
+      {loading ? "loading" : children}
     </button>
   );
 };

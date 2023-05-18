@@ -6,10 +6,7 @@ import { api } from "~/utils/api";
 import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
-import {
-  type Activity,
-  type ActivityKeys,
-} from "~/server/api/routers/utils/strava";
+import { type Activity, type ActivityKeys } from "~/types";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
   { id: "id", label: "ID" },
@@ -23,6 +20,7 @@ const defaultColumns: { id: ActivityKeys; label: string }[] = [
 ];
 
 const StravaActivities: React.FC = () => {
+  const utils = api.useContext();
   const [isMetric, setIsMetric] = useState(false);
   const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,17 +31,18 @@ const StravaActivities: React.FC = () => {
     defaultColumns.map((col) => col.id)
   );
 
-  const {
-    data: dbActivities,
-    isLoading,
-    refetch,
-  } = api.strava.getActivitiesFromDB.useQuery(
-    { page: page, activities_count: 10 },
-    { enabled: sessionData?.user !== undefined }
-  );
+  const { data: dbActivities, isLoading } =
+    api.strava.getActivitiesFromDB.useQuery(
+      { page: page, activities_count: 10 },
+      { enabled: sessionData?.user !== undefined }
+    );
 
-  const getActivitiesMutation =
-    api.strava.getActivitiesFromStrava.useMutation();
+  const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({
+    onSuccess: () => {
+      utils.strava.getActivitiesFromDB.invalidate();
+      setLoading(false);
+    },
+  });
 
   // const handleNextPage = () => setPage((p) => p + 1);
   // const handlePreviousPage = () => setPage((p) => p - 1);
@@ -61,8 +60,6 @@ const StravaActivities: React.FC = () => {
     const mutation = await getActivitiesMutation.mutateAsync();
 
     if (mutation.message === "success") {
-      refetch();
-      setLoading(false);
     }
 
     // console.log("handleGetStravaActivities", mutation);
@@ -144,7 +141,6 @@ const StravaActivities: React.FC = () => {
           <StravaTable
             data={stravaActivities}
             isMetric={isMetric}
-            reloadData={refetch}
             columnsToShow={columnsToShow}
           />
         )}
