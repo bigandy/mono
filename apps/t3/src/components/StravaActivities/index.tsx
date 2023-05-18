@@ -31,7 +31,7 @@ const StravaActivities: React.FC = () => {
   const [isMetric, setIsMetric] = useState(false);
   const [selectedActivityTypes, setSelectedActivityTypes] = useState<
     ActivityType[]
-  >([]);
+  >([...activities]);
   const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -103,6 +103,16 @@ const StravaActivities: React.FC = () => {
     });
   };
 
+  const handleSelectedTypesToggle = () => {
+    setSelectedActivityTypes((prevState) => {
+      if (prevState.length > 0) {
+        return [];
+      } else {
+        return [...activities];
+      }
+    });
+  };
+
   return (
     <div>
       <div>
@@ -162,15 +172,12 @@ const StravaActivities: React.FC = () => {
             Activity Filtering - Activity Type
           </summary>
 
-          <label htmlFor={`activity-all`}>Show All</label>
-          <input
-            className={"ml-2"}
-            type="radio"
-            id={`activity-all`}
-            name="activityType"
-            onClick={() => setSelectedActivityTypes([...activities])}
-            checked={selectedActivityTypes.length === activities.length}
-          />
+          <div onClick={handleSelectedTypesToggle}>
+            Show{" "}
+            {selectedActivityTypes.length === activities.length
+              ? "None"
+              : "All"}
+          </div>
 
           {activities.map((type: ActivityType) => {
             return (
