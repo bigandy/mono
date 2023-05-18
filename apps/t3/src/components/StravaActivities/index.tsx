@@ -189,7 +189,7 @@ const StravaActivities: React.FC = () => {
                   id={`activity-${{ type }}`}
                   name="activityType"
                   checked={selectedActivityTypes.includes(type)}
-                  onClick={() => handleTypeCheckbox(type)}
+                  onChange={() => handleTypeCheckbox(type)}
                 />
               </div>
             );
