@@ -16,7 +16,6 @@ import {
 import { api } from "~/utils/api";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
-  { id: "id", label: "ID" },
   { id: "start_date", label: "Date" },
   { id: "name", label: "Name" },
   { id: "distance", label: "Distance" },
@@ -118,20 +117,23 @@ const StravaActivities: React.FC = () => {
       <div>
         <details>
           <summary className="mt-4 text-xl font-bold">Columns</summary>
-          {defaultColumns.map((column) => {
-            return (
-              <Fragment key={column.id}>
-                <label htmlFor={column.id}>{column.label}</label>
-                <input
-                  type="checkbox"
-                  id={column.id}
-                  checked={columnsToShow.includes(column.id)}
-                  onChange={() => handleColumnCheckbox(column.id)}
-                  className="ml-2 mr-4"
-                />
-              </Fragment>
-            );
-          })}
+          <div className="flex">
+            {defaultColumns.map((column) => {
+              return (
+                <div key={column.id} className="mr-4">
+                  <label htmlFor={column.id} className={`pr-2`}>
+                    {column.label}
+                  </label>
+                  <input
+                    type="checkbox"
+                    id={column.id}
+                    checked={columnsToShow.includes(column.id)}
+                    onChange={() => handleColumnCheckbox(column.id)}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </details>
       </div>
       <div>
@@ -141,25 +143,27 @@ const StravaActivities: React.FC = () => {
           </summary>
           <div className="flex">
             <div className="mr-4 cursor-pointer ">
-              <label htmlFor="metric">Metric</label>
+              <label htmlFor="metric" className={`pr-2`}>
+                Metric
+              </label>
               <input
                 type="radio"
                 name="unitSelector"
                 id="metric"
                 checked={isMetric}
                 onChange={() => setIsMetric(true)}
-                className="ml-2"
               />
             </div>
             <div className="cursor-pointer ">
-              <label htmlFor="imperial">Imperial</label>
+              <label htmlFor="imperial" className={`pr-2`}>
+                Imperial
+              </label>
               <input
                 type="radio"
                 name="unitSelector"
                 id="imperial"
                 checked={!isMetric}
                 onChange={() => setIsMetric(false)}
-                className="ml-2"
               />
             </div>
           </div>
@@ -171,55 +175,37 @@ const StravaActivities: React.FC = () => {
           <summary className="mt-4 text-xl font-bold">
             Activity Filtering - Activity Type
           </summary>
-
-          <div onClick={handleSelectedTypesToggle}>
+          <div
+            onClick={handleSelectedTypesToggle}
+            className="text-blue-600 cursor-pointer"
+          >
             Show{" "}
             {selectedActivityTypes.length === activities.length
               ? "None"
               : "All"}
           </div>
-
-          {activities.map((type: ActivityType) => {
-            return (
-              <div key={`activity-selector-${type}`}>
-                <label htmlFor={`activity-${type}`}>{type}</label>
-                <input
-                  className={"ml-2"}
-                  type="checkbox"
-                  id={`activity-${{ type }}`}
-                  name="activityType"
-                  checked={selectedActivityTypes.includes(type)}
-                  onChange={() => handleTypeCheckbox(type)}
-                />
-              </div>
-            );
-          })}
-          {/* <div className="flex">
-            <label htmlFor="metric">Metric</label>
-            <input
-              type="radio"
-              name="unitSelector"
-              id="metric"
-              checked={isMetric}
-              onChange={() => setIsMetric(true)}
-              className="ml-2"
-            />
-            <label htmlFor="imperial">Imperial</label>
-            <input
-              type="radio"
-              name="unitSelector"
-              id="imperial"
-              checked={!isMetric}
-              onChange={() => setIsMetric(false)}
-              className="ml-2"
-            />
-          </div> */}
+          <div className="flex">
+            {activities.map((type: ActivityType) => {
+              return (
+                <div key={`activity-selector-${type}`} className={"mr-4"}>
+                  <label htmlFor={`activity-${type}`} className={`pr-2`}>
+                    {type}
+                  </label>
+                  <input
+                    type="checkbox"
+                    id={`activity-${type}`}
+                    name="activityType"
+                    checked={selectedActivityTypes.includes(type)}
+                    onChange={() => handleTypeCheckbox(type)}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </details>
       </div>
 
       <div className="container  mt-4 text-base text-black">
-        <Heading as="h2">Strava Data Table</Heading>
-
         {isLoading ? (
           <p>Loading...</p>
         ) : (
