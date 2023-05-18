@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type NextPage } from "next";
+import Link from "next/link";
 import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
@@ -23,7 +24,7 @@ const ActivityPage: NextPage = () => {
     <>
       <BasicLayout title={""}>
         <div>
-          <a href="/activities">&larr; back to Activities</a>
+          <Link href="/activities">&larr; back to Activities</Link>
         </div>
         <div>
           <label htmlFor="editable">Edit?</label>

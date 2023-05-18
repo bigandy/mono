@@ -35,7 +35,7 @@ const StravaActivities: React.FC = () => {
   const { data: dbActivities, isLoading } =
     api.strava.getActivitiesFromDB.useQuery(
       { page: page, activities_count: 10 },
-      { enabled: sessionData?.user !== undefined }
+      { enabled: sessionData?.user !== undefined } // Not sure if this is needed or not.
     );
 
   const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({

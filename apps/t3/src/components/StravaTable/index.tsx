@@ -1,4 +1,5 @@
 import { useMemo, useState, Fragment } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { toast } from "react-hot-toast";
 
@@ -156,7 +157,7 @@ const StravaTable = ({
       columnHelper.accessor("id", {
         header: "",
         cell: ({ getValue }: { getValue: () => any }) => {
-          return <a href={`/activities/${getValue()}`}>See Activity</a>;
+          return <Link href={`/activities/${getValue()}`}>See Activity</Link>;
         },
       }),
     ],

@@ -1,27 +1,28 @@
 import { Fragment, useState, MouseEvent } from "react";
-import { METERS_TO_KMH } from "~/utils/consts";
-import Button from "../Button";
-import { api } from "~/utils/api";
-import { activities, type ActivityType, type Activity } from "~/types";
+import Link from "next/link";
 import { toast } from "react-hot-toast";
 
-type StravaActivityProps = {
-  activity: Activity;
-  linkToActivity?: boolean;
-  editable?: boolean;
-};
+import { METERS_TO_KMH } from "~/utils/consts";
+import { api } from "~/utils/api";
+
+import Button from "~/components/Button";
+
+import { activities, type ActivityType, type Activity } from "~/types";
 
 type StandardViewProps = Pick<
   StravaActivityProps,
   "activity" | "linkToActivity"
 >;
 
+/**
+ * Standard View for viewing an activity.
+ */
 const StandardView = ({ linkToActivity, activity }: StandardViewProps) => {
   return (
     <Fragment>
       <h3 className="mb-4 text-xl font-bold">
         {linkToActivity ? (
-          <a href={`/activities/${activity.id}`}>{activity.name}</a>
+          <Link href={`/activities/${activity.id}`}>{activity.name}</Link>
         ) : (
           activity.name
         )}
@@ -48,6 +49,9 @@ const StandardView = ({ linkToActivity, activity }: StandardViewProps) => {
 
 type EditableViewProps = { activity: Activity };
 
+/**
+ * Editable View for editing an activity.
+ */
 const EditableView = ({ activity }: EditableViewProps) => {
   const utils = api.useContext();
   const updateMutation = api.strava.updateOneActivityinDB.useMutation({
@@ -122,10 +126,14 @@ const EditableView = ({ activity }: EditableViewProps) => {
   );
 };
 
+type StravaActivityProps = {
+  activity: Activity;
+  linkToActivity?: boolean;
+  editable?: boolean;
+};
+
 /**
- * A single Strava Activity
- * @param activity IStravaActivity
- * @returns
+ * A Single Strava Activity
  */
 const StravaActivity = ({
   activity,
