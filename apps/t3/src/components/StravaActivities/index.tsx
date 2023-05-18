@@ -7,6 +7,7 @@ import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
 import { type Activity, type ActivityKeys } from "~/types";
+import { toast } from "react-hot-toast";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
   { id: "id", label: "ID" },
@@ -41,6 +42,7 @@ const StravaActivities: React.FC = () => {
     onSuccess: () => {
       utils.strava.getActivitiesFromDB.invalidate();
       setLoading(false);
+      toast.success("Successfully fetched activities from Strava");
     },
   });
 
@@ -57,12 +59,7 @@ const StravaActivities: React.FC = () => {
 
   const handleGetStravaActivities = async () => {
     setLoading(true);
-    const mutation = await getActivitiesMutation.mutateAsync();
-
-    if (mutation.message === "success") {
-    }
-
-    // console.log("handleGetStravaActivities", mutation);
+    await getActivitiesMutation.mutateAsync();
   };
 
   const handleColumnCheckbox = (column: ActivityKeys) => {

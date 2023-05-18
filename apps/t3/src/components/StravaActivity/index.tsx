@@ -3,6 +3,7 @@ import { METERS_TO_KMH } from "~/utils/consts";
 import Button from "../Button";
 import { api } from "~/utils/api";
 import { activities, type ActivityType, type Activity } from "~/types";
+import { toast } from "react-hot-toast";
 
 type StravaActivityProps = {
   activity: Activity;
@@ -53,6 +54,7 @@ const EditableView = ({ activity }: EditableViewProps) => {
     onSuccess: () => {
       // utils.strava.getActivitiesFromDB.invalidate(); // Don't currently need to do as this is refetched when go to /activites page.
       utils.strava.getActivityFromDB.invalidate({ activityId: activity.id });
+      toast.success("Successfully updated activity");
     },
   });
 

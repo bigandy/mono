@@ -1,5 +1,6 @@
 import { useMemo, useState, Fragment } from "react";
 import { format } from "date-fns";
+import { toast } from "react-hot-toast";
 
 import {
   createColumnHelper,
@@ -13,10 +14,9 @@ import {
   convertMetersToMiles,
 } from "~/utils/conversion";
 import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
+import { api } from "~/utils/api";
 
 import { type ActivityKeys, type Activity } from "~/types";
-
-import { api } from "~/utils/api";
 
 // Components
 import Button from "~/components/Button";
@@ -121,6 +121,7 @@ const StravaTable = ({
       setLoading(false);
       utils.strava.getActivitiesFromDB.invalidate();
       table.resetRowSelection();
+      toast.success("Successfully deleted rows");
     },
   });
 
@@ -183,7 +184,7 @@ const StravaTable = ({
     const rowIds = table
       .getSelectedRowModel()
       .flatRows.map((row) => String(row.original.id));
-    const deleteRows = await deleteMutation.mutateAsync({ rowIds });
+    await deleteMutation.mutateAsync({ rowIds });
   };
 
   return (

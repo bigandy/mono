@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { type NextPage } from "next";
 import { type GetServerSideProps } from "next";
 
@@ -8,22 +7,29 @@ import { api } from "~/utils/api";
 import BasicLayout from "~/layouts/BasicLayout";
 import { redirect } from "~/utils/redirect";
 import Button from "~/components/Button";
+import { toast } from "react-hot-toast";
 
 const SettingsPage: NextPage = () => {
-  const getActivities = api.strava.getActivitiesFromStrava.useMutation();
-  const [loading, setLoading] = useState(false);
-  const syncActivitiesFromStrava = async () => {
-    setLoading(true);
-    const act = await getActivities.mutateAsync();
-    if (act.message === "success") {
-      setLoading(false);
-    }
+  const { isLoading, mutate } = api.strava.getActivitiesFromStrava.useMutation({
+    onSuccess: () => {
+      toast.success("Successfully synced activities from Strava");
+    },
+  });
+
+  const syncActivitiesFromStrava = () => {
+    mutate();
   };
+
   return (
     <>
       <BasicLayout title="Activities">
-        <Button onClick={syncActivitiesFromStrava}>
-          {!loading ? "Sync Activities From Strava" : "Loading"}
+        <Button
+          onClick={syncActivitiesFromStrava}
+          big
+          primary
+          loading={isLoading}
+        >
+          Sync Activities From Strava
         </Button>
       </BasicLayout>
     </>
