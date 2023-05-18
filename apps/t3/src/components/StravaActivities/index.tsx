@@ -7,7 +7,12 @@ import { toast } from "react-hot-toast";
 import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
-import { type Activity, type ActivityKeys } from "~/types";
+import {
+  activities,
+  type Activity,
+  type ActivityKeys,
+  type ActivityType,
+} from "~/types";
 import { api } from "~/utils/api";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
@@ -24,6 +29,9 @@ const defaultColumns: { id: ActivityKeys; label: string }[] = [
 const StravaActivities: React.FC = () => {
   const utils = api.useContext();
   const [isMetric, setIsMetric] = useState(false);
+  const [selectedActivityTypes, setSelectedActivityTypes] = useState<
+    ActivityType[]
+  >([]);
   const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -52,11 +60,15 @@ const StravaActivities: React.FC = () => {
 
   useEffect(() => {
     if (dbActivities && dbActivities.length > 0) {
-      setStravaActivities(dbActivities);
+      setStravaActivities(
+        dbActivities.filter((activity) => {
+          return selectedActivityTypes.includes(activity.type);
+        })
+      );
     } else {
       setStravaActivities([]);
     }
-  }, [dbActivities?.length, page]);
+  }, [dbActivities?.length, selectedActivityTypes.length]);
 
   const handleGetStravaActivities = async () => {
     setLoading(true);
@@ -74,6 +86,20 @@ const StravaActivities: React.FC = () => {
       } else {
         return [...newState, column];
       }
+    });
+  };
+
+  const handleTypeCheckbox = (checkboxType: ActivityType) => {
+    setSelectedActivityTypes((prevState) => {
+      const newState = [...prevState];
+      if (prevState.includes(checkboxType)) {
+        // remove it from array
+        const indexOfCol = newState.findIndex((col) => col === checkboxType);
+        newState.splice(indexOfCol, 1);
+      } else {
+        newState.push(checkboxType);
+      }
+      return newState;
     });
   };
 
@@ -127,6 +153,60 @@ const StravaActivities: React.FC = () => {
               />
             </div>
           </div>
+        </details>
+      </div>
+
+      <div>
+        <details>
+          <summary className="mt-4 text-xl font-bold">
+            Activity Filtering - Activity Type
+          </summary>
+
+          <label htmlFor={`activity-all`}>Show All</label>
+          <input
+            className={"ml-2"}
+            type="radio"
+            id={`activity-all`}
+            name="activityType"
+            onClick={() => setSelectedActivityTypes([...activities])}
+            checked={selectedActivityTypes.length === activities.length}
+          />
+
+          {activities.map((type: ActivityType) => {
+            return (
+              <div key={`activity-selector-${type}`}>
+                <label htmlFor={`activity-${type}`}>{type}</label>
+                <input
+                  className={"ml-2"}
+                  type="checkbox"
+                  id={`activity-${{ type }}`}
+                  name="activityType"
+                  checked={selectedActivityTypes.includes(type)}
+                  onClick={() => handleTypeCheckbox(type)}
+                />
+              </div>
+            );
+          })}
+          {/* <div className="flex">
+            <label htmlFor="metric">Metric</label>
+            <input
+              type="radio"
+              name="unitSelector"
+              id="metric"
+              checked={isMetric}
+              onChange={() => setIsMetric(true)}
+              className="ml-2"
+            />
+            <label htmlFor="imperial">Imperial</label>
+            <input
+              type="radio"
+              name="unitSelector"
+              id="imperial"
+              checked={!isMetric}
+              onChange={() => setIsMetric(false)}
+              className="ml-2"
+            />
+          </div> */}
         </details>
       </div>
 
