@@ -1,19 +1,15 @@
-import { useState, useEffect, Fragment } from "react";
-import { type NextPage } from "next";
+import { Fragment, useEffect, useState } from "react";
+
+import { type GetServerSideProps, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 
+import Button from "~/components/Button";
+import StravaActivity from "~/components/StravaActivity";
 import BasicLayout from "~/layouts/BasicLayout";
-
-import { type GetServerSideProps } from "next";
-
+import { type Activity } from "~/types";
+import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
-import { api } from "~/utils/api";
-
-import StravaActivity from "~/components/StravaActivity";
-import Button from "~/components/Button";
-
-import { type Activity } from "~/types";
 
 const Home: NextPage = () => {
   const utils = api.useContext();

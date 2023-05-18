@@ -1,13 +1,14 @@
-import { useState, useEffect, Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+
 import { useSession } from "next-auth/react";
 
-import { api } from "~/utils/api";
+import { toast } from "react-hot-toast";
 
 import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
 import { type Activity, type ActivityKeys } from "~/types";
-import { toast } from "react-hot-toast";
+import { api } from "~/utils/api";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
   { id: "id", label: "ID" },

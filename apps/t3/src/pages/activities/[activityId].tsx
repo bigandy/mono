@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { type NextPage } from "next";
+
+import { type GetServerSideProps, type NextPage } from "next";
 import Link from "next/link";
-import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
-import withSession from "~/utils/middleware/withSession";
-
-import BasicLayout from "~/layouts/BasicLayout";
-import { redirect } from "~/utils/redirect";
-import { api } from "~/utils/api";
 import StravaActivity from "~/components/StravaActivity";
+import BasicLayout from "~/layouts/BasicLayout";
+import { api } from "~/utils/api";
+import withSession from "~/utils/middleware/withSession";
+import { redirect } from "~/utils/redirect";
 
 const ActivityPage: NextPage = () => {
   const [editable, setEditable] = useState(false);

@@ -1,9 +1,7 @@
-import { type NextPage } from "next";
-import { type GetServerSideProps } from "next";
-
-import withSession from "~/utils/middleware/withSession";
+import { type GetServerSideProps, type NextPage } from "next";
 
 import BasicLayout from "~/layouts/BasicLayout";
+import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
 
 const ProfilePage: NextPage = () => {

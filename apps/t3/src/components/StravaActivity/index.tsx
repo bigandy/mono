@@ -1,13 +1,13 @@
-import { Fragment, useState, MouseEvent } from "react";
+import { Fragment, MouseEvent, useState } from "react";
+
 import Link from "next/link";
+
 import { toast } from "react-hot-toast";
 
-import { METERS_TO_KMH } from "~/utils/consts";
-import { api } from "~/utils/api";
-
 import Button from "~/components/Button";
-
-import { activities, type ActivityType, type Activity } from "~/types";
+import { activities, type Activity, type ActivityType } from "~/types";
+import { api } from "~/utils/api";
+import { METERS_TO_KMH } from "~/utils/consts";
 
 type StandardViewProps = Pick<
   StravaActivityProps,

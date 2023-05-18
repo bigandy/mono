@@ -1,7 +1,6 @@
-import { useMemo, useState, Fragment } from "react";
+import { Fragment, useMemo, useState } from "react";
+
 import Link from "next/link";
-import { format } from "date-fns";
-import { toast } from "react-hot-toast";
 
 import {
   createColumnHelper,
@@ -10,18 +9,19 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import {
-  convertMetersToKilometers,
-  convertMetersToMiles,
-} from "~/utils/conversion";
-import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
-import { api } from "~/utils/api";
-
-import { type ActivityKeys, type Activity } from "~/types";
+import { format } from "date-fns";
+import { toast } from "react-hot-toast";
 
 // Components
 import Button from "~/components/Button";
 import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
+import { type Activity, type ActivityKeys } from "~/types";
+import { api } from "~/utils/api";
+import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
+import {
+  convertMetersToKilometers,
+  convertMetersToMiles,
+} from "~/utils/conversion";
 
 const columnHelper = createColumnHelper<Activity>();
 

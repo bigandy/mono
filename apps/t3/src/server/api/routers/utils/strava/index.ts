@@ -1,4 +1,5 @@
 import stravaApi from "strava-v3";
+
 import { ActivityType } from "~/types";
 
 /**

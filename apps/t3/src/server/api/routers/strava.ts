@@ -5,16 +5,15 @@ import {
   protectedProcedure,
   protectedProcedureWithAccount,
 } from "~/server/api/trpc";
+import { activities, ActivityType, type IStravaActivity } from "~/types";
 
 import {
-  getAccessToken,
   // updateActivitytoWalk,
   fetchActivities,
   fetchOneActivity,
+  getAccessToken,
   updateOneActivity,
 } from "./utils/strava";
-
-import { type IStravaActivity, activities, ActivityType } from "~/types";
 
 // const stravaActivityZod = z.object({
 //   activityId: z.string(),
