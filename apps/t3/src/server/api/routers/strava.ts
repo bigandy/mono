@@ -1,309 +1,183 @@
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  protectedProcedureWithAccount,
+} from "~/server/api/trpc";
+import { activities, ActivityType, type IStravaActivity } from "~/types";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  // updateActivitytoWalk,
+  fetchActivities,
+  fetchOneActivity,
+  getAccessToken,
+  updateOneActivity,
+} from "./utils/strava";
 
-import stravaApi from "strava-v3";
-
-const getAccessToken = async (account: any, ctx: any) => {
-  const expires_at = account.expires_at!;
-
-  const secondsSinceEpoch = Math.round(Date.now() / 1000);
-  let accessToken = account.access_token!;
-
-  // check if the expires_at is in the past. If it is the access_token should still be valid.
-  if (secondsSinceEpoch > expires_at) {
-    console.log("need a new token");
-    const { access_token, refresh_token, expires_at } = await rotateAccessToken(
-      account.refresh_token!
-    );
-
-    accessToken = access_token;
-
-    // TODO: Replace updateMany with update.
-    await ctx.prisma.account.updateMany({
-      where: {
-        userId: ctx.session.user.id,
-        provider: "strava",
-      },
-      data: {
-        access_token,
-        refresh_token,
-        expires_at,
-      },
-    });
-
-    return accessToken;
-  } else {
-    // console.log("access token is still valid. Woop!");
-    return accessToken;
-  }
-};
+// const stravaActivityZod = z.object({
+//   activityId: z.string(),
+//   name: z.string(),
+//   start_date: z.string(),
+//   distance: z.number(),
+//   type: z.string(),
+//   average_speed: z.number(),
+//   private: z.boolean(),
+// });
 
 export const stravaRouter = createTRPCRouter({
-  convertOneActivity: protectedProcedure
-    .input(
-      z.object({
-        activityId: z.string().optional(),
-        activityName: z.string().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (input.activityId === "" && input.activityName !== "") {
-        return {
-          message: "no activity id",
-        };
-      }
-      // console.log("convert this activity: ", input);
-
-      // Get the associated tokens: access_token, refresh_token, and expires_at
-      const account = await ctx.prisma.account.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-        },
-      });
-
-      if (account && input.activityId && input.activityName) {
-        const accessToken = await getAccessToken(account, ctx);
-        const res = await updateActivity(
-          accessToken,
-          input.activityId,
-          input.activityName
-        );
-
-        return { message: "success", res };
-      }
-
-      // return { message: "success" };
-    }),
-  saveOneActivity: protectedProcedure
-    .input(
-      z.object({
-        activityId: z.number().optional(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      if (!input.activityId) {
-        return {
-          message: "no activity id",
-        };
-      }
-      // console.log("convert this activity: ", input);
-
-      // Get the associated tokens: access_token, refresh_token, and expires_at
-      // const account = await ctx.prisma.account.findFirst({
-      //   where: {
-      //     userId: ctx.session.user.id,
-      //   },
-      // });
-
-      // if (account && input.activityId && input.activityName) {
-      //   const accessToken = await getAccessToken(account, ctx);
-      //   const res = await updateActivity(
-      //     accessToken,
-      //     input.activityId,
-      //     input.activityName
-      //   );
-
-      //   return { message: "success", res };
-      // }
-      console.log("save one Activity please");
-      // const selectedActivity = activities.find(
-      //   (act) => act.id === input.activityId
-      // );
-      // console.log(selectedActivity);
-
-      return { message: "success" };
-    }),
-  saveManyActivities: protectedProcedure
-    .input(
-      z.object({
-        activityIds: z.array(z.number()).optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (input.activityIds?.length === 0) {
-        return {
-          message: "no activity ids",
-        };
-      }
-      // console.log("convert this activity: ", input);
-
-      // Get the associated tokens: access_token, refresh_token, and expires_at
-      // const account = await ctx.prisma.account.findFirst({
-      //   where: {
-      //     userId: ctx.session.user.id,
-      //   },
-      // });
-
-      // if (account && input.activityId && input.activityName) {
-      //   const accessToken = await getAccessToken(account, ctx);
-      //   const res = await updateActivity(
-      //     accessToken,
-      //     input.activityId,
-      //     input.activityName
-      //   );
-
-      //   return { message: "success", res };
-      // }
-      console.log("save many Activities please", input.activityIds);
-      // const selectedActivity = activities.find(
-      //   (act) => act.id === input.activityId
-      // );
-      // console.log(selectedActivity);
-
-      return { message: "success" };
-    }),
-  getActivities: protectedProcedure
+  getActivitiesFromDB: protectedProcedure
     .input(z.object({ page: z.number(), activities_count: z.number() }))
-    .query(async ({ ctx, input }) => {
-      // Get the associated tokens: access_token, refresh_token, and expires_at
-      const account = await ctx.prisma.account.findFirst({
+    .query(async ({ ctx }) => {
+      const { user } = ctx.session;
+
+      const activities = await ctx.prisma.activity.findMany({
         where: {
-          userId: ctx.session.user.id,
+          user: {
+            id: user.id,
+          },
+        },
+        orderBy: {
+          start_date: "desc",
         },
       });
+      return activities;
+    }),
+  updateOneActivity: protectedProcedureWithAccount
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.enum(activities),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { account } = ctx.session;
 
       if (account) {
         const accessToken = await getAccessToken(account, ctx);
-        const fetchedActivities: StravaActivity[] = await fetchActivities(
-          accessToken,
-          input.page,
-          input.activities_count
-        );
-
-        // activities.push(...fetchedActivities);
-
-        return fetchedActivities;
-      } else {
-        return [];
+        await Promise.all([
+          updateOneActivity(accessToken, input.id, {
+            name: input.name,
+            type: input.type,
+          }),
+          ctx.prisma.activity.update({
+            where: {
+              id: input.id,
+            },
+            data: {
+              name: input.name,
+              type: input.type,
+            },
+          }),
+        ]);
       }
     }),
+  deleteDBActivities: protectedProcedure
+    .input(z.object({ rowIds: z.array(z.string()) }))
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      const { rowIds } = input;
+
+      await ctx.prisma.activity.deleteMany({
+        where: {
+          user: {
+            id: user.id,
+          },
+          id: {
+            in: rowIds,
+          },
+        },
+      });
+      return { message: "success" };
+    }),
+  getActivityFromDB: protectedProcedure
+    .input(z.object({ activityId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      const { activityId } = input;
+
+      if (activityId === "") {
+        // return TRPCClientError
+        return;
+      }
+
+      const activities = await ctx.prisma.activity.findMany({
+        where: {
+          user: {
+            id: user.id,
+          },
+          id: activityId,
+        },
+      });
+      return activities[0];
+    }),
+  getOneActivityFromStrava: protectedProcedureWithAccount
+    .input(z.object({ activityId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { account } = ctx.session;
+      if (account) {
+        const accessToken = await getAccessToken(account, ctx);
+
+        const fetchedActivity: IStravaActivity = await fetchOneActivity(
+          accessToken,
+          input.activityId
+        );
+
+        return fetchedActivity;
+      } else {
+        return null;
+      }
+    }),
+  getActivitiesFromStrava: protectedProcedureWithAccount.mutation(
+    async ({ ctx }) => {
+      const { account, user } = ctx.session;
+
+      if (account) {
+        const accessToken = await getAccessToken(account, ctx);
+        const fetchedActivities: IStravaActivity[] = await fetchActivities(
+          accessToken,
+          1,
+          50
+        );
+
+        // loop through the activities;
+        await fetchedActivities.reduce((promiseChain, activity) => {
+          return promiseChain.then(async () => {
+            const data = {
+              id: activity.id.toString(),
+              name: activity.name,
+              distance: activity.distance,
+              type: activity.type as ActivityType,
+              average_speed: activity.average_speed,
+              start_date: activity.start_date,
+              private: activity.private,
+              average_heartrate: activity.has_heartrate
+                ? activity.average_heartrate
+                : 0,
+              kudos_count: activity.kudos_count,
+              achievement_count: activity.achievement_count,
+              total_elevation_gain: activity.total_elevation_gain,
+              user: { connect: { id: user.id } },
+            };
+            // add to DB
+            await ctx.prisma.activity.upsert({
+              where: {
+                id: data.id,
+              },
+              create: data,
+              update: data,
+            });
+          });
+        }, Promise.resolve());
+
+        return {
+          message: "success",
+        };
+      } else {
+        return {
+          message: "failure",
+        };
+      }
+    }
+  ),
 });
-
-interface PolylineMap {
-  id: string;
-  polyline: string;
-  summary_polyline: string;
-}
-
-// Mostly correct I think.
-export interface StravaActivity {
-  resource_state: number;
-  athlete: any;
-  name: string;
-  distance: number;
-  moving_time: number;
-  elapsed_time: number;
-  total_elevation_gain: number;
-  type: string;
-  sport_type: string;
-  id: number;
-  start_date: string;
-  start_date_local: Date;
-  timezone: string;
-  utc_offset: number;
-  location_city: null;
-  location_state: null;
-  location_country: string;
-  achievement_count: number;
-  kudos_count: number;
-  comment_count: number;
-  athlete_count: number;
-  photo_count: number;
-  map: PolylineMap;
-  trainer: boolean;
-  commute: boolean;
-  manual: boolean;
-  private: boolean;
-  visibility: string;
-  flagged: boolean;
-  gear_id: string;
-  start_latlng: Record<string, string>;
-  end_latlng: Record<string, string>;
-  average_speed: number;
-  max_speed: number;
-  average_cadence: number;
-  has_heartrate: true;
-  average_heartrate: number;
-  max_heartrate: number;
-  heartrate_opt_out: boolean;
-  display_hide_heartrate_option: true;
-  elev_high: number;
-  elev_low: number;
-  upload_id: number;
-  upload_id_str: string;
-  external_id: string;
-  from_accepted_tag: false;
-  pr_count: number;
-  total_photo_count: number;
-  has_kudoed: boolean;
-}
-
-const rotateAccessToken = async (refreshToken: string) => {
-  const newToken = await stravaApi.oauth.refreshToken(refreshToken);
-
-  const { access_token, refresh_token, expires_at } = newToken;
-
-  console.log("success in generating new tokens", {
-    // access_token,
-    // refresh_token,
-    // expires_at,
-  });
-
-  return { access_token, refresh_token, expires_at };
-};
-
-const getStravaClient = (accessToken: string) => {
-  return new (stravaApi.client as any)(accessToken);
-};
-
-const fetchActivities = async (
-  accessToken: string,
-  page: number = 1,
-  activities_count: number = 10
-) => {
-  try {
-    const stravaAPI = getStravaClient(accessToken);
-
-    const payload = await stravaAPI.athlete.listActivities({
-      page: page,
-      per_page: activities_count,
-    });
-
-    return payload;
-  } catch (error) {
-    // @ts-ignore
-    if (error?.error?.errors[0]?.code === "invalid") {
-      return Error("invalid access token, need another");
-    }
-    return Error("error in fetch activities");
-  }
-};
-
-const updateActivity = async (
-  accessToken: string,
-  activityId: string,
-  activityName: string
-) => {
-  try {
-    const stravaAPI = getStravaClient(accessToken);
-
-    var args = {
-      id: activityId,
-      name: activityName.replace(/run/gi, "walk"),
-      sport_type: "Walk",
-      type: "Walk",
-    };
-
-    const payload = await stravaAPI.activities.update(args);
-    // console.log({ payload });
-
-    return payload;
-  } catch (error) {
-    // @ts-ignore
-    if (error?.error?.errors[0]?.code === "invalid") {
-      return Error("invalid access token, need another");
-    }
-    return Error("error in fetch activities");
-  }
-};

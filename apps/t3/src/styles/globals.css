@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+a {
+  color: blue;
+}
+
+a:focus,
+a:hover {
+  text-decoration: underline;
+}
+
 body {
   overflow-y: scroll;
 }

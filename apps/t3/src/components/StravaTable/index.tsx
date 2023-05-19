@@ -1,167 +1,179 @@
-import {
-  useMemo,
-  useEffect,
-  useRef,
-  type HTMLProps,
-  useState,
-  Fragment,
-} from "react";
-import { format } from "date-fns";
+import { Fragment, useMemo, useState } from "react";
+
+import Link from "next/link";
 
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
+import { type Activity, type ActivityKeys } from "~/types";
+import { toast } from "react-hot-toast";
+
+import { api } from "~/utils/api";
+import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
 import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
-import { StravaActivity } from "~/server/api/routers/strava";
-
-import { api } from "~/utils/api";
+import { niceActivityDate } from "~/utils/date-time";
 
 import Button from "~/components/Button";
+import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
 
-const METERS_TO_KMH = 3.6;
-const METERS_TO_MPH = 2.23694;
-
-const columnHelper = createColumnHelper<StravaActivity>();
-
-const columns = [
-  {
-    id: "select",
-    header: ({ table }: { table: any }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: table.getIsAllRowsSelected(),
-          indeterminate: table.getIsSomeRowsSelected(),
-          onChange: table.getToggleAllRowsSelectedHandler(),
-        }}
-      />
-    ),
-    cell: ({ row }: { row: any }) => (
-      <div className="px-1">
-        <IndeterminateCheckbox
-          {...{
-            checked: row.getIsSelected(),
-            disabled: !row.getCanSelect(),
-            indeterminate: row.getIsSomeSelected(),
-            onChange: row.getToggleSelectedHandler(),
-          }}
-        />
-      </div>
-    ),
-  },
-  columnHelper.accessor("id", {
-    header: "id",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("start_date", {
-    header: "Date",
-    cell: (info) => {
-      return format(new Date(info.getValue()), "dd-MM-yyyy 'at' h:mm aaa");
-    },
-  }),
-  columnHelper.accessor("name", {
-    header: "Name",
-    cell: (info) => info.renderValue(),
-  }),
-  columnHelper.accessor("distance", {
-    header: ({ table }) => {
-      return (
-        <>
-          Distance
-          <br />
-          <small>({table?.options?.meta?.distanceUnit})</small>
-        </>
-      );
-    },
-    cell: ({ getValue, table }) => {
-      const distance = table.options.meta.isMetric
-        ? convertMetersToKilometers(getValue())
-        : convertMetersToMiles(getValue());
-      return `${distance} ${table.options.meta.distanceUnit}`;
-    },
-  }),
-  columnHelper.accessor("type", {
-    header: "Activity Type",
-  }),
-
-  columnHelper.accessor("average_speed", {
-    header: ({ table }) => {
-      return (
-        <>
-          Average Speed
-          <br />
-          <small>({table.options.meta.speedUnit})</small>
-        </>
-      );
-    },
-    cell: ({ table, getValue }) => {
-      const averageSpeed = table.options.meta.isMetric
-        ? getValue() * METERS_TO_KMH
-        : getValue() * METERS_TO_MPH;
-      return `${averageSpeed.toFixed(2)} ${table.options.meta.speedUnit}`;
-    },
-  }),
-  columnHelper.accessor("private", {
-    header: "Private?",
-    cell: ({ getValue }) => (getValue() ? "private" : ""),
-  }),
-];
-
-function IndeterminateCheckbox({
-  indeterminate,
-  className = "",
-  ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-  const ref = useRef<HTMLInputElement>(null!);
-
-  useEffect(() => {
-    if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate]);
-
-  return (
-    // @ts-ignore
-    <input
-      type="checkbox"
-      ref={ref}
-      className={className + " cursor-pointer"}
-      {...rest}
-    />
-  );
-}
+const columnHelper = createColumnHelper<Activity>();
 
 const StravaTable = ({
   data,
   isMetric,
-  reloadData,
+  columnsToShow,
 }: {
-  data: StravaActivity[] | [];
-  reloadData: () => void;
+  data: Activity[] | [];
   isMetric: boolean;
+  columnsToShow: ActivityKeys[];
 }) => {
+  const utils = api.useContext();
   const speedUnit = isMetric ? "km/h" : "mph";
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
-  const oneMutation = api.strava.saveOneActivity.useMutation();
-  const manyMutation = api.strava.saveManyActivities.useMutation();
-  const convertMutation = api.strava.convertOneActivity.useMutation();
+  const columns = useMemo(() => {
+    const listOfColumns = [
+      // columnHelper.accessor("id", {
+      //   header: "ID",
+      //   id: "id",
+      //   cell: (info) => info.getValue(),
+      // }),
+
+      columnHelper.accessor("start_date", {
+        header: "Date",
+        id: "start_date",
+        cell: (info) => {
+          return niceActivityDate(info.getValue());
+        },
+      }),
+      columnHelper.accessor("name", {
+        header: "Name",
+        id: "name",
+        cell: (info) => info.renderValue(),
+      }),
+      columnHelper.accessor("distance", {
+        id: "distance",
+        header: ({ table }) => {
+          return (
+            <>
+              Distance
+              <br />
+              <small>({table?.options?.meta?.distanceUnit})</small>
+            </>
+          );
+        },
+        cell: ({ getValue, table }) => {
+          const distance = table.options.meta?.isMetric
+            ? convertMetersToKilometers(getValue())
+            : convertMetersToMiles(getValue());
+          return `${distance} ${table.options.meta?.distanceUnit}`;
+        },
+      }),
+      columnHelper.accessor("type", {
+        header: "Activity Type",
+        id: "type",
+      }),
+      columnHelper.accessor("total_elevation_gain", {
+        header: "Elevation Gain",
+        id: "total_elevation_gain",
+      }),
+
+      columnHelper.accessor("average_speed", {
+        id: "average_speed",
+        header: ({ table }) => {
+          return (
+            <>
+              Average Speed
+              <br />
+              <small>({table.options?.meta?.speedUnit})</small>
+            </>
+          );
+        },
+        cell: ({ table, getValue }) => {
+          const averageSpeed = table.options.meta?.isMetric
+            ? getValue() * METERS_TO_KMH
+            : getValue() * METERS_TO_MPH;
+          return `${averageSpeed.toFixed(2)} ${table.options.meta?.speedUnit}`;
+        },
+      }),
+      columnHelper.accessor("private", {
+        id: "private",
+        header: "Private?",
+        cell: ({ getValue }: { getValue: () => any }) =>
+          getValue() ? "private" : "",
+      }),
+    ];
+
+    return listOfColumns.filter((column) => {
+      return columnsToShow.includes(column.id as ActivityKeys);
+    });
+  }, [columnsToShow]);
+
+  const deleteMutation = api.strava.deleteDBActivities.useMutation({
+    onSuccess: () => {
+      setLoading(false);
+      utils.strava.getActivitiesFromDB.invalidate();
+      table.resetRowSelection();
+      toast.success("Successfully deleted rows");
+    },
+  });
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }) => (
+          <div className="px-1">
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(),
+                disabled: !row.getCanSelect(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+              }}
+            />
+          </div>
+        ),
+      },
+      ...columns,
+
+      columnHelper.accessor("id", {
+        header: "",
+        cell: ({ getValue }: { getValue: () => any }) => {
+          return <Link href={`/activities/${getValue()}`}>See Activity</Link>;
+        },
+      }),
+    ],
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    getSortedRowModel: getSortedRowModel(),
     state: {
       rowSelection,
+      sorting,
     },
     meta: {
       speedUnit,
@@ -171,84 +183,53 @@ const StravaTable = ({
   });
 
   const selectedActivities = useMemo(() => {
-    // console.log("changing");
-    const rowModal = table.getSelectedRowModel();
-    // console.log(rowModal.flatRows.map((row) => row.original.id));
-    return rowModal.flatRows.map((row) => row.original.id);
+    return table.getSelectedRowModel().flatRows.map((row) => row.original.id);
   }, [rowSelection]);
 
   const activitiesCount = selectedActivities.length;
 
-  const handleSaveOne = async () => {
-    // 1. what is the id of the selected row?
-    const activityId = selectedActivities[0];
-    // 2. fire off the saveActivity mutation
-
-    const thing = await oneMutation.mutateAsync({
-      activityId,
-    });
-    // finally: reset the selection
-    if (thing.message === "success") {
-      table.resetRowSelection();
-    }
-    console.log({ thing });
-  };
-
-  const handleConvertOne = async () => {
-    const activityId = selectedActivities[0];
-    const activity = table
+  const handleDeleteRows = async () => {
+    setLoading(true);
+    const rowIds = table
       .getSelectedRowModel()
-      .flatRows.find((row) => row.original.id === activityId);
-
-    if (!activity || activity.original.type !== "Run") {
-      table.resetRowSelection();
-    } else {
-      const mutation = await convertMutation.mutateAsync({
-        activityId: activity.original.id.toString(),
-        activityName: activity.original.name,
-      });
-
-      if (mutation?.message === "success") {
-        reloadData();
-        table.resetRowSelection();
-      }
-    }
-    // console.log({ original: activity.original });
-    return;
+      .flatRows.map((row) => String(row.original.id));
+    await deleteMutation.mutateAsync({ rowIds });
   };
-
-  const handleSaveAll = async () => {
-    // // 1. what is the id of the selected row?
-    // const activityId = selectedActivities;
-    // // 2. fire off the saveActivity mutation
-    const thing = await manyMutation.mutateAsync({
-      activityIds: selectedActivities,
-    });
-    // // finally: reset the selection
-    if (thing.message === "success") {
-      table.resetRowSelection();
-    }
-    // console.log({ thing });
-  };
-
-  // console.log(mutation.isSuccess);
 
   return (
     <Fragment>
       <table>
-        <thead>
+        <thead className={"sticky top-[64px] bg-white shadow-md"}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const cellIsClickable = header.column.columnDef.header !== "";
+                return (
+                  <th
+                    key={header.id}
+                    {...{
+                      className:
+                        header.column.getCanSort() && cellIsClickable
+                          ? "cursor-pointer select-none"
+                          : "",
+                      onClick: cellIsClickable
+                        ? header.column.getToggleSortingHandler()
+                        : undefined,
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                    {{
+                      asc: " 🔼",
+                      desc: " 🔽",
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
@@ -265,11 +246,10 @@ const StravaTable = ({
         </tbody>
       </table>
       <StravaTableActionBar
+        loading={loading}
         onReset={() => table.resetRowSelection()}
-        onSaveOne={handleSaveOne}
-        onSaveAll={handleSaveAll}
+        onDeleteRows={handleDeleteRows}
         count={activitiesCount}
-        onConvertOne={handleConvertOne}
       />
     </Fragment>
   );
@@ -285,15 +265,13 @@ const StravaTable = ({
 const StravaTableActionBar = ({
   count,
   onReset,
-  onSaveOne,
-  onSaveAll,
-  onConvertOne,
+  onDeleteRows,
+  loading,
 }: {
   count: number;
   onReset: () => void;
-  onSaveOne: () => void;
-  onSaveAll: () => void;
-  onConvertOne: () => void;
+  onDeleteRows: () => void;
+  loading: boolean;
 }) => {
   if (count === 0) {
     return null;
@@ -301,13 +279,15 @@ const StravaTableActionBar = ({
   return (
     <div className="fixed bottom-0 left-0   w-screen border bg-white p-4">
       <div className="container  mx-auto  flex max-w-7xl items-center gap-4 px-2 sm:px-6 lg:px-8">
-        <p>You have selected {count} activities</p>
-        {count === 1 && <Button onClick={onSaveOne}>Save ONE to DB</Button>}
-        {count === 1 && (
-          <Button onClick={onConvertOne}>Convert ONE in Strava</Button>
+        {loading ? (
+          <p>Loading</p>
+        ) : (
+          <Fragment>
+            <p>You have selected {count} activities</p>
+            <Button onClick={onDeleteRows}>Delete {count} activities</Button>
+            <Button onClick={onReset}>Reset Selection</Button>
+          </Fragment>
         )}
-        {count > 1 && <Button onClick={onSaveAll}>Save ALL to DB</Button>}
-        <Button onClick={onReset}>Reset</Button>
       </div>
     </div>
   );

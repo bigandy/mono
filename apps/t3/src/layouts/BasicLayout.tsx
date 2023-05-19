@@ -1,7 +1,5 @@
 import Head from "next/head";
 
-import { signIn, useSession } from "next-auth/react";
-import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import NavBar from "~/components/NavBar";
 
@@ -10,7 +8,6 @@ interface Props extends React.PropsWithChildren {
 }
 
 const BasicLayout = ({ title, children }: Props) => {
-  const { data: sessionData } = useSession();
   return (
     <>
       <Head>
@@ -19,13 +16,7 @@ const BasicLayout = ({ title, children }: Props) => {
         <link rel="icon" href="/images/strava.svg" />
       </Head>
       <NavBar />
-      <header className="w-full px-10 pt-4">
-        <div className="container mx-auto">
-          {!sessionData && (
-            <Button onClick={() => void signIn("strava")}>{"Sign in"}</Button>
-          )}
-        </div>
-      </header>
+
       <main className="w-full p-10">
         <div className="container  mx-auto  max-w-7xl px-2 sm:px-6 lg:px-8">
           <Heading as="h1">{title}</Heading>

@@ -5,19 +5,20 @@ import BasicLayout from "~/layouts/BasicLayout";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
 
-import StravaActivitiesTable from "~/components/StravaActivities";
-
-const ActivitiesPage: NextPage = () => {
+const ProfilePage: NextPage = () => {
   return (
     <>
-      <BasicLayout title="Activities">
-        <StravaActivitiesTable />
+      <BasicLayout title="Profile">
+        <p>
+          Here will appear statistics based on all the Strava Data in the DB.
+          Woop!
+        </p>
       </BasicLayout>
     </>
   );
 };
 
-export default ActivitiesPage;
+export default ProfilePage;
 
 // @ts-expect-error TODO: Need to fix typing of ctx
 export const getServerSideProps: GetServerSideProps = withSession((ctx) => {

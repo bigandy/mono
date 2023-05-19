@@ -1,11 +1,12 @@
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
 import StravaProvider from "next-auth/providers/strava";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
 
