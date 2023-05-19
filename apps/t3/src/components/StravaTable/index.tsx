@@ -284,7 +284,9 @@ const StravaTableActionBar = ({
         ) : (
           <Fragment>
             <p>You have selected {count} activities</p>
-            <Button onClick={onDeleteRows}>Delete {count} activities</Button>
+            <Button primary onClick={onDeleteRows}>
+              Delete {count} activities
+            </Button>
             <Button onClick={onReset}>Reset Selection</Button>
           </Fragment>
         )}

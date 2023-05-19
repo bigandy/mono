@@ -56,9 +56,6 @@ const StravaActivities: React.FC = () => {
     },
   });
 
-  // const handleNextPage = () => setPage((p) => p + 1);
-  // const handlePreviousPage = () => setPage((p) => p - 1);
-
   useEffect(() => {
     if (dbActivities && dbActivities.length > 0) {
       setStravaActivities(
