@@ -8,13 +8,17 @@ import { redirect } from "~/utils/redirect";
 
 import Button from "~/components/Button";
 
+import ConnectWithStravaIcon from "../../../public/images/strava/connect-with-strava.svg";
+
 const SignInPage: NextPage = () => {
   const { data: sessionData } = useSession();
   return (
     <BasicLayout title="Sign In">
       <div className="container mx-auto">
         {!sessionData && (
-          <Button onClick={() => void signIn("strava")}>{"Sign in"}</Button>
+          <Button unstyled onClick={() => void signIn("strava")}>
+            <ConnectWithStravaIcon />
+          </Button>
         )}
       </div>
     </BasicLayout>

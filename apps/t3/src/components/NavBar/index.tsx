@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
-import StravaLogo from "../../../public/images/strava.svg";
+import StravaLogo from "../../../public/images/strava/strava-favicon.svg";
 
 function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(" ");

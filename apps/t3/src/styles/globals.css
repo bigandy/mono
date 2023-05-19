@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+#__next {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 a {
   color: blue;
 }
