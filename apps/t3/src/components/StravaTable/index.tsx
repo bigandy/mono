@@ -12,7 +12,6 @@ import {
 } from "@tanstack/react-table";
 
 import { type Activity, type ActivityKeys } from "~/types";
-import { format } from "date-fns";
 import { toast } from "react-hot-toast";
 
 import { api } from "~/utils/api";
@@ -21,6 +20,7 @@ import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
+import { niceActivityDate } from "~/utils/date-time";
 
 import Button from "~/components/Button";
 import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
@@ -55,7 +55,7 @@ const StravaTable = ({
         header: "Date",
         id: "start_date",
         cell: (info) => {
-          return format(new Date(info.getValue()), "dd-MM-yyyy 'at' h:mm aaa");
+          return niceActivityDate(info.getValue());
         },
       }),
       columnHelper.accessor("name", {
