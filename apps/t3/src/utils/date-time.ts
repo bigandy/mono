@@ -1,5 +1,12 @@
-import { format } from "date-fns";
+import { format, isYesterday } from "date-fns";
+import isToday from "date-fns/isToday";
 
 export const niceActivityDate = (date: string) => {
-  return format(new Date(date), "dd-MM-yyyy 'at' h:mm aaa");
+  const activityDate = new Date(date);
+
+  const prefix =
+    (isToday(activityDate) && "'Today'") ||
+    (isYesterday(activityDate) && "'Yesterday'") ||
+    "dd MMM yyyy";
+  return format(activityDate, `${prefix} 'at' HH:mm`);
 };

@@ -2,12 +2,14 @@ import { type GetServerSideProps, type NextPage } from "next";
 
 import BasicLayout from "~/layouts/BasicLayout";
 
+import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
 
 import StravaActivitiesTable from "~/components/StravaActivities";
 
 const ActivitiesPage: NextPage = () => {
+  api.strava.getActivitiesFromDB.useQuery({ page: 1, activities_count: 10 });
   return (
     <>
       <BasicLayout title="Activities">
