@@ -11,10 +11,12 @@ import {
 import { toast } from "react-hot-toast";
 
 import { api } from "~/utils/api";
+import { isMetricAtom, useAtom } from "~/utils/store";
 
 import Button from "~/components/Button";
-import Heading from "~/components/Heading";
 import StravaTable from "~/components/StravaTable";
+
+import UnitSelector from "../UnitSelector";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
   { id: "start_date", label: "Date" },
@@ -27,19 +29,19 @@ const defaultColumns: { id: ActivityKeys; label: string }[] = [
 ];
 
 const StravaActivities: React.FC = () => {
-  const utils = api.useContext();
-  const [isMetric, setIsMetric] = useState(false);
+  const [isMetric] = useAtom(isMetricAtom);
   const [selectedActivityTypes, setSelectedActivityTypes] = useState<
     ActivityType[]
   >([...activities]);
   const [stravaActivities, setStravaActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const { data: sessionData } = useSession();
-  const page = 1;
   const [columnsToShow, setColumnsToShow] = useState<ActivityKeys[]>(
     defaultColumns.map((col) => col.id)
   );
+
+  const utils = api.useContext();
+
+  const { data: sessionData } = useSession();
+  const page = 1;
 
   const { data: dbActivities, isLoading } =
     api.strava.getActivitiesFromDB.useQuery(
@@ -50,7 +52,6 @@ const StravaActivities: React.FC = () => {
   const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({
     onSuccess: () => {
       utils.strava.getActivitiesFromDB.invalidate();
-      setLoading(false);
       toast.success("Successfully fetched activities from Strava");
     },
   });
@@ -71,20 +72,19 @@ const StravaActivities: React.FC = () => {
   }, [dbActivities?.length, selectedActivityTypes.length]);
 
   const handleGetStravaActivities = async () => {
-    setLoading(true);
     await getActivitiesMutation.mutateAsync();
   };
 
-  const handleColumnCheckbox = (column: ActivityKeys) => {
+  const handleColumnCheckbox = (columnId: ActivityKeys) => {
     setColumnsToShow((prevState) => {
       const newState = [...prevState];
-      if (newState.includes(column)) {
+      if (newState.includes(columnId)) {
         // remove from prevState
-        const indexOfCol = newState.findIndex((col) => col === column);
+        const indexOfCol = newState.findIndex((col) => col === columnId);
         newState.splice(indexOfCol, 1);
         return newState;
       } else {
-        return [...newState, column];
+        return [...newState, columnId];
       }
     });
   };
@@ -113,8 +113,75 @@ const StravaActivities: React.FC = () => {
     });
   };
 
+  const loading = isLoading || getActivitiesMutation.isLoading;
+
   return (
-    <div>
+    <div className="">
+      <TableControl
+        handleSelectedTypesToggle={handleSelectedTypesToggle}
+        handleColumnCheckbox={handleColumnCheckbox}
+        handleTypeCheckbox={handleTypeCheckbox}
+        columnsToShow={columnsToShow}
+        selectedActivityTypes={selectedActivityTypes}
+      />
+      <div className="mt-4 text-base text-black relative h-full">
+        {isLoading && <PageLoader />}
+        <StravaTable
+          data={stravaActivities}
+          isMetric={isMetric}
+          columnsToShow={columnsToShow}
+        />
+
+        {stravaActivities.length === 0 && (
+          <div className="mt-4">
+            <Button
+              primary
+              big
+              onClick={handleGetStravaActivities}
+              disabled={isLoading || loading}
+            >
+              {isLoading || loading ? "Loading" : "Get Strava Activities"}
+            </Button>
+          </div>
+        )}
+
+        {/* <Button
+          disabled={page < 2}
+          className="mr-4 mt-4 "
+          onClick={handlePreviousPage}
+        >
+          &larr; Get Previous Page ({page - 1})
+        </Button>
+
+        <Button className="mt-4" onClick={handleNextPage}>
+          Get Next Page ({page + 1}) &rarr;
+        </Button> */}
+      </div>
+    </div>
+  );
+};
+
+type TableControlProps = {
+  handleTypeCheckbox: (checkboxType: ActivityType) => void;
+  handleColumnCheckbox: (columnId: ActivityKeys) => void;
+  handleSelectedTypesToggle: () => void;
+  columnsToShow: ActivityKeys[];
+  selectedActivityTypes: ActivityType[];
+};
+
+/**
+ * TableControl sets the columns / filters / unit for the table
+ */
+const TableControl = ({
+  handleTypeCheckbox,
+  handleColumnCheckbox,
+  handleSelectedTypesToggle,
+  columnsToShow,
+  selectedActivityTypes,
+}: TableControlProps) => {
+  const [isMetric, setIsMetric] = useAtom(isMetricAtom);
+  return (
+    <Fragment>
       <div>
         <details>
           <summary className="mt-4 text-xl font-bold">Columns</summary>
@@ -142,32 +209,7 @@ const StravaActivities: React.FC = () => {
           <summary className="mt-4 text-xl font-bold">
             Metric / Imperial
           </summary>
-          <div className="flex">
-            <div className="mr-4 cursor-pointer ">
-              <label htmlFor="metric" className={`pr-2`}>
-                Metric
-              </label>
-              <input
-                type="radio"
-                name="unitSelector"
-                id="metric"
-                checked={isMetric}
-                onChange={() => setIsMetric(true)}
-              />
-            </div>
-            <div className="cursor-pointer ">
-              <label htmlFor="imperial" className={`pr-2`}>
-                Imperial
-              </label>
-              <input
-                type="radio"
-                name="unitSelector"
-                id="imperial"
-                checked={!isMetric}
-                onChange={() => setIsMetric(false)}
-              />
-            </div>
-          </div>
+          <UnitSelector setIsMetric={setIsMetric} isMetric={isMetric} />
         </details>
       </div>
 
@@ -205,43 +247,14 @@ const StravaActivities: React.FC = () => {
           </div>
         </details>
       </div>
+    </Fragment>
+  );
+};
 
-      <div className="container  mt-4 text-base text-black">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <StravaTable
-            data={stravaActivities}
-            isMetric={isMetric}
-            columnsToShow={columnsToShow}
-          />
-        )}
-
-        {stravaActivities.length === 0 && (
-          <div className="mt-4">
-            <Button
-              primary
-              big
-              onClick={handleGetStravaActivities}
-              disabled={isLoading || loading}
-            >
-              {isLoading || loading ? "Loading" : "Get Strava Activities"}
-            </Button>
-          </div>
-        )}
-
-        {/* <Button
-          disabled={page < 2}
-          className="mr-4 mt-4 "
-          onClick={handlePreviousPage}
-        >
-          &larr; Get Previous Page ({page - 1})
-        </Button>
-
-        <Button className="mt-4" onClick={handleNextPage}>
-          Get Next Page ({page + 1}) &rarr;
-        </Button> */}
-      </div>
+const PageLoader = () => {
+  return (
+    <div className="text-6xl z-10 absolute inset-0 h-screen  w-full bg-black/50 text-white grid place-content-center">
+      LOADING...
     </div>
   );
 };

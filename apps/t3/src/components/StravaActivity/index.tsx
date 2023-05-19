@@ -6,8 +6,13 @@ import { activities, type Activity, type ActivityType } from "~/types";
 import { toast } from "react-hot-toast";
 
 import { api } from "~/utils/api";
-import { METERS_TO_KMH } from "~/utils/consts";
+import { FEET_TO_METERS, METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
+import {
+  convertMetersToKilometers,
+  convertMetersToMiles,
+} from "~/utils/conversion";
 import { niceActivityDate } from "~/utils/date-time";
+import { isMetricAtom, useAtom } from "~/utils/store";
 
 import Button from "~/components/Button";
 
@@ -20,6 +25,7 @@ type StandardViewProps = Pick<
  * Standard View for viewing an activity.
  */
 const StandardView = ({ linkToActivity, activity }: StandardViewProps) => {
+  const [isMetric] = useAtom(isMetricAtom);
   return (
     <Fragment>
       <h3 className="mb-4 text-xl font-bold">
@@ -37,10 +43,21 @@ const StandardView = ({ linkToActivity, activity }: StandardViewProps) => {
       <div>Achievements: {activity.achievement_count}</div>
       <div>Kudos: {activity.kudos_count}</div>
       <div>Average HR: {activity.average_heartrate}bpm</div>
-      <div>Total Climbing: {activity.total_elevation_gain}m</div>
+      <br />
       <div>
-        Average Speed: {(activity.average_speed * METERS_TO_KMH).toFixed(2)}kmh
+        Total Climbing:{" "}
+        {convertClimbing(activity.total_elevation_gain, isMetric, 1)}{" "}
+        {isMetric ? "m" : "ft"}
       </div>
+      <div>
+        Average Speed: {convertSpeed(activity.average_speed, isMetric)}{" "}
+        {isMetric ? "km/h" : "mph"}
+      </div>
+      <div>
+        Distance: {convertDistance(activity.distance, isMetric)}{" "}
+        {isMetric ? "km" : "miles"}
+      </div>
+      <br />
       <div>Activity Type: {activity.type}</div>
 
       <a
@@ -51,6 +68,22 @@ const StandardView = ({ linkToActivity, activity }: StandardViewProps) => {
       </a>
     </Fragment>
   );
+};
+
+const convertSpeed = (meters: number, isMetric: boolean, dp: number = 2) => {
+  return (meters * (isMetric ? METERS_TO_KMH : METERS_TO_MPH)).toFixed(dp);
+};
+
+const convertClimbing = (meters: number, isMetric: boolean, dp: number = 2) => {
+  return (isMetric ? meters : meters * FEET_TO_METERS).toFixed(dp);
+};
+
+const convertDistance = (meters: number, isMetric: boolean) => {
+  if (isMetric) {
+    return convertMetersToKilometers(meters);
+  } else {
+    return convertMetersToMiles(meters);
+  }
 };
 
 type EditableViewProps = { activity: Activity };

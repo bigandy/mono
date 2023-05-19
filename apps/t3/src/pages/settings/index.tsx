@@ -1,15 +1,22 @@
 import { type GetServerSideProps, type NextPage } from "next";
 
-import BasicLayout from "~/layouts/BasicLayout";
+import { useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { toast } from "react-hot-toast";
+
+import BasicLayout from "~/layouts/BasicLayout";
 
 import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
 
 import Button from "~/components/Button";
+import UnitSelector from "~/components/UnitSelector";
+
+const isMetricAtom = atomWithStorage("isMetric", true);
 
 const SettingsPage: NextPage = () => {
+  const [isMetric, setIsMetric] = useAtom(isMetricAtom);
   const { isLoading, mutate } = api.strava.getActivitiesFromStrava.useMutation({
     onSuccess: () => {
       toast.success("Successfully synced activities from Strava");
@@ -31,6 +38,9 @@ const SettingsPage: NextPage = () => {
         >
           Sync Activities From Strava
         </Button>
+
+        <div className="mt-4 text-xl font-bold">Metric / Imperial</div>
+        <UnitSelector isMetric={isMetric} setIsMetric={setIsMetric} />
       </BasicLayout>
     </>
   );

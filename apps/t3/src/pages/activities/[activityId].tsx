@@ -28,13 +28,12 @@ const ActivityPage: NextPage = () => {
           <Link href="/activities">&larr; back to Activities</Link>
         </div>
         <div>
-          <label htmlFor="editable">Edit?</label>
-          <input
-            type="checkbox"
-            checked={editable}
-            onChange={() => setEditable((e) => !e)}
-            id="editable"
-          />
+          <div
+            className="my-4 text-orange-400 font-bold underline cursor-pointer"
+            onClick={() => setEditable((e) => !e)}
+          >
+            {!editable ? "Edit?" : "Cancel"}
+          </div>
         </div>
 
         {isLoading && <p>Loading...</p>}
