@@ -26,7 +26,7 @@ const Button = ({
     classes += " px-10 py-4";
   }
   if (unstyled) {
-    classes = "";
+    classes = className ? className : "";
   }
   return (
     <button
