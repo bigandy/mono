@@ -6,6 +6,8 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -39,6 +41,7 @@ const StravaTable = ({
   const distanceUnit = isMetric ? "km" : "miles";
   const [rowSelection, setRowSelection] = useState({});
   const [loading, setLoading] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const columns = useMemo(() => {
     const listOfColumns = [
@@ -47,6 +50,7 @@ const StravaTable = ({
       //   id: "id",
       //   cell: (info) => info.getValue(),
       // }),
+
       columnHelper.accessor("start_date", {
         header: "Date",
         id: "start_date",
@@ -154,6 +158,7 @@ const StravaTable = ({
         ),
       },
       ...columns,
+
       columnHelper.accessor("id", {
         header: "",
         cell: ({ getValue }: { getValue: () => any }) => {
@@ -161,11 +166,14 @@ const StravaTable = ({
         },
       }),
     ],
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    getSortedRowModel: getSortedRowModel(),
     state: {
       rowSelection,
+      sorting,
     },
     meta: {
       speedUnit,
@@ -194,16 +202,34 @@ const StravaTable = ({
         <thead className={"sticky top-[64px] bg-white shadow-md"}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const cellIsClickable = header.column.columnDef.header !== "";
+                return (
+                  <th
+                    key={header.id}
+                    {...{
+                      className:
+                        header.column.getCanSort() && cellIsClickable
+                          ? "cursor-pointer select-none"
+                          : "",
+                      onClick: cellIsClickable
+                        ? header.column.getToggleSortingHandler()
+                        : undefined,
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                    {{
+                      asc: " 🔼",
+                      desc: " 🔽",
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
