@@ -4,11 +4,13 @@ import { type GetServerSideProps, type NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import StravaActivity from "~/components/StravaActivity";
 import BasicLayout from "~/layouts/BasicLayout";
+
 import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
+
+import StravaActivity from "~/components/StravaActivity";
 
 const ActivityPage: NextPage = () => {
   const [editable, setEditable] = useState(false);

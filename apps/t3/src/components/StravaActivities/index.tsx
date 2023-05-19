@@ -2,18 +2,19 @@ import { Fragment, useEffect, useState } from "react";
 
 import { useSession } from "next-auth/react";
 
-import { toast } from "react-hot-toast";
-
-import Button from "~/components/Button";
-import Heading from "~/components/Heading";
-import StravaTable from "~/components/StravaTable";
 import {
   activities,
   type Activity,
   type ActivityKeys,
   type ActivityType,
 } from "~/types";
+import { toast } from "react-hot-toast";
+
 import { api } from "~/utils/api";
+
+import Button from "~/components/Button";
+import Heading from "~/components/Heading";
+import StravaTable from "~/components/StravaTable";
 
 const defaultColumns: { id: ActivityKeys; label: string }[] = [
   { id: "start_date", label: "Date" },

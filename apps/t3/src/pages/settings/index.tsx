@@ -1,12 +1,13 @@
 import { type GetServerSideProps, type NextPage } from "next";
 
+import BasicLayout from "~/layouts/BasicLayout";
 import { toast } from "react-hot-toast";
 
-import Button from "~/components/Button";
-import BasicLayout from "~/layouts/BasicLayout";
 import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
+
+import Button from "~/components/Button";
 
 const SettingsPage: NextPage = () => {
   const { isLoading, mutate } = api.strava.getActivitiesFromStrava.useMutation({

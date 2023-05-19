@@ -1,6 +1,5 @@
-import stravaApi from "strava-v3";
-
 import { ActivityType } from "~/types";
+import stravaApi from "strava-v3";
 
 /**
  * A method to get a Strava Access Token

@@ -9,19 +9,19 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { type Activity, type ActivityKeys } from "~/types";
 import { format } from "date-fns";
 import { toast } from "react-hot-toast";
 
-// Components
-import Button from "~/components/Button";
-import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
-import { type Activity, type ActivityKeys } from "~/types";
 import { api } from "~/utils/api";
 import { METERS_TO_KMH, METERS_TO_MPH } from "~/utils/consts";
 import {
   convertMetersToKilometers,
   convertMetersToMiles,
 } from "~/utils/conversion";
+
+import Button from "~/components/Button";
+import IndeterminateCheckbox from "~/components/IndeterminateCheckbox";
 
 const columnHelper = createColumnHelper<Activity>();
 

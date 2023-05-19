@@ -1,9 +1,11 @@
 import { type GetServerSideProps, type NextPage } from "next";
 
-import StravaActivitiesTable from "~/components/StravaActivities";
 import BasicLayout from "~/layouts/BasicLayout";
+
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
+
+import StravaActivitiesTable from "~/components/StravaActivities";
 
 const ActivitiesPage: NextPage = () => {
   return (

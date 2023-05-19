@@ -1,11 +1,10 @@
-import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
   protectedProcedureWithAccount,
 } from "~/server/api/trpc";
 import { activities, ActivityType, type IStravaActivity } from "~/types";
+import { z } from "zod";
 
 import {
   // updateActivitytoWalk,

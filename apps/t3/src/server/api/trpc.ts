@@ -26,11 +26,10 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
-
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
+import superjson from "superjson";
+import { ZodError } from "zod";
 
 type CreateContextOptions = {
   session: Session | null;

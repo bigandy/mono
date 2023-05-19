@@ -1,10 +1,12 @@
 import { type GetServerSideProps, type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 
-import Button from "~/components/Button";
 import BasicLayout from "~/layouts/BasicLayout";
+
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
+
+import Button from "~/components/Button";
 
 const SignInPage: NextPage = () => {
   const { data: sessionData } = useSession();

@@ -3,13 +3,15 @@ import { Fragment, useEffect, useState } from "react";
 import { type GetServerSideProps, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 
-import Button from "~/components/Button";
-import StravaActivity from "~/components/StravaActivity";
 import BasicLayout from "~/layouts/BasicLayout";
 import { type Activity } from "~/types";
+
 import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
 import { redirect } from "~/utils/redirect";
+
+import Button from "~/components/Button";
+import StravaActivity from "~/components/StravaActivity";
 
 const Home: NextPage = () => {
   const utils = api.useContext();
