@@ -3,8 +3,9 @@ import { Fragment, useEffect, useState } from "react";
 import { type GetServerSideProps, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 
-import BasicLayout from "~/layouts/BasicLayout";
 import { type Activity } from "~/types";
+
+import BasicLayout from "~/layouts/BasicLayout";
 
 import { api } from "~/utils/api";
 import withSession from "~/utils/middleware/withSession";
@@ -26,12 +27,13 @@ const Home: NextPage = () => {
       { enabled: sessionData?.user !== undefined }
     );
 
-  const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({
-    onSuccess: () => {
-      utils.strava.getActivitiesFromDB.invalidate();
-      setLoading(false);
-    },
-  });
+  const getActivitiesMutation =
+    api.strava.getRecentActivitiesFromStrava.useMutation({
+      onSuccess: () => {
+        utils.strava.getActivitiesFromDB.invalidate();
+        setLoading(false);
+      },
+    });
 
   useEffect(() => {
     if (dbActivities && dbActivities.length > 0) {

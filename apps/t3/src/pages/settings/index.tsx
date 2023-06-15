@@ -17,11 +17,12 @@ const isMetricAtom = atomWithStorage("isMetric", true);
 
 const SettingsPage: NextPage = () => {
   const [isMetric, setIsMetric] = useAtom(isMetricAtom);
-  const { isLoading, mutate } = api.strava.getActivitiesFromStrava.useMutation({
-    onSuccess: () => {
-      toast.success("Successfully synced activities from Strava");
-    },
-  });
+  const { isLoading, mutate } =
+    api.strava.getAllActivitiesFromStrava.useMutation({
+      onSuccess: () => {
+        toast.success("Successfully synced activities from Strava");
+      },
+    });
 
   const syncActivitiesFromStrava = () => {
     mutate();

@@ -64,6 +64,9 @@ enum ActivityType {
   Ride
   VirtualRide
   StandUpPaddling
+  Workout
+  Swim
+  EBikeRide
 }
 
 model Activity {
