@@ -56,17 +56,28 @@ model User {
 }
 
 enum ActivityType {
-  Canoeing
   Run
   TrailRun
   Walk
   Hike
-  Ride
-  VirtualRide
+  Canoeing
   StandUpPaddling
   Workout
-  Swim
+  VirtualRun
+  Ride
+  MountainBikeRide
+  GravelBikeRide
   EBikeRide
+  EMountainBikeRide
+  Velomobile
+  VirtualRide
+  Canoe
+  Kayak
+  KitesurfSession
+  Row
+  StandUpPaddle
+  Surf
+  Swim
 }
 
 model Activity {
