@@ -11,6 +11,7 @@ import {
   fetchActivities,
   fetchOneActivity,
   getAccessToken,
+  saveAllActivitiesToDB,
   updateOneActivity,
 } from "./utils/strava";
 
@@ -128,7 +129,36 @@ export const stravaRouter = createTRPCRouter({
         return null;
       }
     }),
-  getActivitiesFromStrava: protectedProcedureWithAccount.mutation(
+  getAllActivitiesFromStrava: protectedProcedureWithAccount.mutation(
+    async ({ ctx }) => {
+      const { account, user } = ctx.session;
+
+      let page = 1;
+
+      // get 1000 activities
+      if (account) {
+        let fetchedActivities: IStravaActivity[] = [];
+        do {
+          const accessToken = await getAccessToken(account, ctx);
+
+          fetchedActivities = await fetchActivities(accessToken, page, 100);
+          console.log(fetchedActivities.length, page);
+
+          await saveAllActivitiesToDB(ctx, fetchedActivities, user);
+          page++;
+        } while (fetchedActivities.length !== 0 && page <= 10);
+
+        return {
+          message: "success",
+        };
+      } else {
+        return {
+          message: "failure",
+        };
+      }
+    }
+  ),
+  getRecentActivitiesFromStrava: protectedProcedureWithAccount.mutation(
     async ({ ctx }) => {
       const { account, user } = ctx.session;
 
@@ -140,35 +170,7 @@ export const stravaRouter = createTRPCRouter({
           50
         );
 
-        // loop through the activities;
-        await fetchedActivities.reduce((promiseChain, activity) => {
-          return promiseChain.then(async () => {
-            const data = {
-              id: activity.id.toString(),
-              name: activity.name,
-              distance: activity.distance,
-              type: activity.type as ActivityType,
-              average_speed: activity.average_speed,
-              start_date: activity.start_date,
-              private: activity.private,
-              average_heartrate: activity.has_heartrate
-                ? activity.average_heartrate
-                : 0,
-              kudos_count: activity.kudos_count,
-              achievement_count: activity.achievement_count,
-              total_elevation_gain: activity.total_elevation_gain,
-              user: { connect: { id: user.id } },
-            };
-            // add to DB
-            await ctx.prisma.activity.upsert({
-              where: {
-                id: data.id,
-              },
-              create: data,
-              update: data,
-            });
-          });
-        }, Promise.resolve());
+        await saveAllActivitiesToDB(ctx, fetchedActivities, user);
 
         return {
           message: "success",

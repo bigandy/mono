@@ -1,5 +1,44 @@
-import { ActivityType } from "~/types";
+import type { ActivityType, IStravaActivity } from "~/types";
 import stravaApi from "strava-v3";
+
+/**
+ * A method to save all activities returned from the Strava API to the DB
+ */
+export const saveAllActivitiesToDB = async (
+  ctx: any,
+  fetchedActivities: IStravaActivity[],
+  user: any
+) => {
+  // loop through the activities;
+  return await fetchedActivities.reduce((promiseChain, activity) => {
+    return promiseChain.then(async () => {
+      const data = {
+        id: activity.id.toString(),
+        name: activity.name,
+        distance: activity.distance,
+        type: activity.type as ActivityType,
+        average_speed: activity.average_speed,
+        start_date: activity.start_date,
+        private: activity.private,
+        average_heartrate: activity.has_heartrate
+          ? activity.average_heartrate
+          : 0,
+        kudos_count: activity.kudos_count,
+        achievement_count: activity.achievement_count,
+        total_elevation_gain: activity.total_elevation_gain,
+        user: { connect: { id: user.id } },
+      };
+      // add to DB
+      await ctx.prisma.activity.upsert({
+        where: {
+          id: data.id,
+        },
+        create: data,
+        update: data,
+      });
+    });
+  }, Promise.resolve());
+};
 
 /**
  * A method to get a Strava Access Token

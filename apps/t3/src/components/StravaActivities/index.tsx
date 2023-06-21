@@ -49,12 +49,13 @@ const StravaActivities: React.FC = () => {
       { enabled: sessionData?.user !== undefined } // Not sure if this is needed or not.
     );
 
-  const getActivitiesMutation = api.strava.getActivitiesFromStrava.useMutation({
-    onSuccess: () => {
-      utils.strava.getActivitiesFromDB.invalidate();
-      toast.success("Successfully fetched activities from Strava");
-    },
-  });
+  const getActivitiesMutation =
+    api.strava.getRecentActivitiesFromStrava.useMutation({
+      onSuccess: () => {
+        utils.strava.getActivitiesFromDB.invalidate();
+        toast.success("Successfully fetched activities from Strava");
+      },
+    });
 
   useEffect(() => {
     if (dbActivities && dbActivities.length > 0) {
